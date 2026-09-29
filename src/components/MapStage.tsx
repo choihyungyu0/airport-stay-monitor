@@ -1,16 +1,19 @@
 import L from 'leaflet'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Circle, CircleMarker, GeoJSON, MapContainer, Marker, Popup, TileLayer, Tooltip, useMap, useMapEvents, ZoomControl } from 'react-leaflet'
+import { loadBuildingIndex } from '../lib/data'
 import { fmt, fmtMil } from '../lib/format'
 import { loadFonts } from '../lib/fonts'
 import { distanceKm, prefersReducedMotion } from '../lib/geo'
 import { binColor } from '../lib/ramp'
 import { iata, mapStory } from '../lib/story'
-import type { Basemap, Boundary, BoundaryFeature, ContentPin, Indicators, Meta, SggData, SidoBoundary } from '../lib/types'
+import type { Basemap, Boundary, BoundaryFeature, BuildingArea, BuildingIndex, ContentPin, Indicators, Meta, SggData, SidoBoundary } from '../lib/types'
+import { BuildingLayer, BuildingPanel, MAX_ZOOM, MAX_ZOOM_BUILDINGS, maxZoomFor, PROTECT_MIN_ZOOM, ProtectMask, ZoomLimit, type Picked } from './Buildings'
 import { FidsPanel, SggPanel } from './StagePanels'
 
 // 지도 탭 첫 화면: 전면 위성지도. 1장면 = 전국(공항 4곳), 2장면 = 청주 권역(충북 시군구 단계구분도).
 // 배경은 V-World 타일만(위성 + 하이브리드 라벨, 지도 = midnight). 최대 줌 12, 공항 시설·활주로 표시 없음.
+// 청주 권역에서 「숙박·음식 건물」을 켠 때만 최대 줌 17(줌 14부터 건물 윤곽). 공항 보호구역 3km는 줌 13부터 불투명 마스크.
 
 const KEY: string = import.meta.env.VITE_VWORLD_KEY ?? ''
 const vw = (layer: string, ext: string) => `https://api.vworld.kr/req/wmts/1.0.0/${KEY}/${layer}/{z}/{y}/{x}.${ext}`
@@ -19,7 +22,6 @@ const KOREA: L.LatLngBoundsExpression = [
   [38.6, 129.6],
 ]
 const CHEONGJU: [number, number] = [36.64, 127.49]
-const MAX_ZOOM = 12
 const SIGN = '#f5b800'
 const FILL: Record<Basemap, number> = { satellite: 0.55, gray: 0.75, none: 0.9 }
 const LABELED = new Set(['43111', '43112', '43113', '43114', '43130', '43150', '43800'])
@@ -46,6 +48,32 @@ export function MapStage({ data, sgg, meta, nat, boundary, sido, onToast }: Prop
   const [pinned, setPinned] = useState<string | null>(null)
   const panel = useRef<HTMLDivElement>(null)
   const [placed, setPlaced] = useState(false)
+  const [zoom, setZoom] = useState(0)
+  // 건물 레이어(청주 권역 장면에서만)
+  const [bld, setBld] = useState(false)
+  const [bIndex, setBIndex] = useState<BuildingIndex | null>(null)
+  const [bErr, setBErr] = useState(false)
+  const [picked, setPicked] = useState<Picked | null>(null)
+  const [jump, setJump] = useState<{ to: [number, number]; seq: number } | null>(null)
+  const onBErr = useCallback(() => setBErr(true), [])
+
+  const toggleBld = () => {
+    if (bld) {
+      setBld(false)
+      setPicked(null)
+      return
+    }
+    setBld(true)
+    setBErr(false)
+    if (!bIndex)
+      loadBuildingIndex()
+        .then(setBIndex)
+        .catch(() => setBErr(true))
+  }
+  const jumpTo = (a: BuildingArea) => {
+    setPicked(null)
+    setJump((j) => ({ to: a.focus, seq: (j?.seq ?? 0) + 1 }))
+  }
 
   const choose = (b: Basemap) => {
     if (b !== 'none' && !KEY) {
@@ -71,7 +99,10 @@ export function MapStage({ data, sgg, meta, nat, boundary, sido, onToast }: Prop
     setMonth(null)
     setHover(null)
     setPinned(null)
+    setBld(false)
+    setPicked(null)
   }
+  const buildings = bld && scene === 'cheongju'
 
   return (
     <section className={`stage scene-${scene}`} aria-label="지도" id="map">
@@ -89,8 +120,13 @@ export function MapStage({ data, sgg, meta, nat, boundary, sido, onToast }: Prop
       >
         <ZoomControl position="bottomright" />
         <InitialView onDone={() => setPlaced(true)} />
-        {placed && <Tiles basemap={basemap} labels={scene === 'korea'} onFail={onTileFail} />}
+        <ZoomLimit max={maxZoomFor(buildings)} />
+        <ZoomWatch onZoom={setZoom} />
+        {/* 하이브리드 라벨: 전국 보기, 그리고 건물을 볼 만큼 가까이(줌 13+) 갔을 때 길 이름을 찾도록 */}
+        {placed && <Tiles basemap={basemap} labels={scene === 'korea' || (buildings && zoom >= PROTECT_MIN_ZOOM)} faint={buildings} onFail={onTileFail} />}
         {data && placed && <View scene={scene} selected={selected} data={data} panel={panel} />}
+        {jump && <Jump key={jump.seq} to={jump.to} panel={panel} />}
+        {data && <ProtectMask airports={data.airports} />}
         {data && scene === 'korea' && (
           <>
             {selected && sido && <SidoHighlight sido={sido} region={data.airports.find((a) => a.id === selected)?.region} target={selected === data.target} />}
@@ -108,8 +144,10 @@ export function MapStage({ data, sgg, meta, nat, boundary, sido, onToast }: Prop
             active={hover ?? pinned}
             onHover={setHover}
             onPin={(cd) => setPinned((p) => (p === cd ? null : cd))}
+            quiet={buildings}
           />
         )}
+        {buildings && bIndex && <BuildingLayer index={bIndex} picked={picked?.p.id ?? null} onPick={setPicked} onError={onBErr} />}
       </MapContainer>
 
       <div className="stage-bg" role="group" aria-label="배경지도 선택" data-ui="SEG-03">
@@ -120,6 +158,13 @@ export function MapStage({ data, sgg, meta, nat, boundary, sido, onToast }: Prop
         ))}
       </div>
 
+      {scene === 'cheongju' && data && (
+        <button type="button" className="stage-bld" aria-pressed={bld} onClick={toggleBld}>
+          <i aria-hidden="true" />
+          숙박·음식 건물
+        </button>
+      )}
+
       <div ref={panel} className={`stage-panel ${scene === 'korea' ? 'left' : 'right'}`} aria-busy={!data}>
         {!data || !sgg ? (
           <div className="stage-wait" aria-label="불러오는 중">
@@ -128,6 +173,19 @@ export function MapStage({ data, sgg, meta, nat, boundary, sido, onToast }: Prop
           </div>
         ) : scene === 'korea' ? (
           <FidsPanel data={data} meta={meta} nat={nat} selected={selected} onSelect={setSelected} month={month} onMonth={setMonth} onScene={() => goScene('cheongju')} />
+        ) : buildings ? (
+          <BuildingPanel
+            index={bIndex}
+            error={bErr}
+            sgg={sgg}
+            nat={nat}
+            zoom={zoom}
+            picked={picked}
+            lodging={data.airports.find((a) => a.id === data.target)?.lodging}
+            onJump={jumpTo}
+            onClear={() => setPicked(null)}
+            onOff={toggleBld}
+          />
         ) : (
           <SggPanel
             data={data}
@@ -161,9 +219,9 @@ export function MapStage({ data, sgg, meta, nat, boundary, sido, onToast }: Prop
   )
 }
 
-/** V-World 배경. 전국 보기의 위성에는 하이브리드(지명·도로 라벨)를 겹친다.
+/** V-World 배경. 전국 보기의 위성에는 하이브리드(지명·도로 라벨)를 겹친다. 건물을 볼 때(줌 13+)는 길 이름을 찾도록 옅게 겹친다.
  *  청주 권역(줌 9)에서는 하이브리드 글자가 커져 단계구분도를 가리므로 빼고 시군구 라벨만 쓴다. */
-function Tiles({ basemap, labels, onFail }: { basemap: Basemap; labels: boolean; onFail: (b: Basemap) => void }) {
+function Tiles({ basemap, labels, faint, onFail }: { basemap: Basemap; labels: boolean; faint: boolean; onFail: (b: Basemap) => void }) {
   const count = useRef({ ok: 0, err: 0 })
   // 라벨(하이브리드)은 위성 타일이 먼저 보이고 나서 받는다(첫 화면 표시를 앞당김)
   const [ready, setReady] = useState(false)
@@ -185,11 +243,12 @@ function Tiles({ basemap, labels, onFail }: { basemap: Basemap; labels: boolean;
     },
   }
   // keepBuffer 1: 화면 밖 여분 타일을 한 줄만. updateWhenZooming false: 날아가는 중간 줌 타일은 받지 않는다
-  const common = { attribution: '국토교통부 브이월드', maxZoom: MAX_ZOOM, maxNativeZoom: MAX_ZOOM, keepBuffer: 1, updateWhenZooming: false }
+  // 타일 최대 줌은 17까지 열어 두고, 실제 한도는 지도 최대 줌(ZoomLimit: 기본 12, 건물 켠 때 17)이 정한다
+  const common = { attribution: '국토교통부 브이월드', maxZoom: MAX_ZOOM_BUILDINGS, maxNativeZoom: MAX_ZOOM_BUILDINGS, keepBuffer: 1, updateWhenZooming: false }
   return basemap === 'satellite' ? (
     <>
       <TileLayer key="sat" url={vw('Satellite', 'jpeg')} {...common} eventHandlers={handlers} />
-      {labels && ready && <TileLayer key="hyb" url={vw('Hybrid', 'png')} {...common} />}
+      {labels && ready && <TileLayer key="hyb" url={vw('Hybrid', 'png')} {...common} opacity={faint ? 0.5 : 1} />}
     </>
   ) : (
     <TileLayer key="gray" url={vw('midnight', 'png')} {...common} eventHandlers={handlers} />
@@ -207,6 +266,8 @@ function InitialView({ onDone }: { onDone: () => void }) {
       ? { paddingTopLeft: [12, 12] as L.PointTuple, paddingBottomRight: [12, 12] as L.PointTuple }
       : { paddingTopLeft: [Math.min(640, w - 32) + 32, 24] as L.PointTuple, paddingBottomRight: [24, 24] as L.PointTuple }
     map.fitBounds(KOREA, { ...pad, maxZoom: 7, animate: false })
+    // 개발 서버에서만: 브라우저 점검용(운영 빌드에서는 빠진다)
+    if (import.meta.env.DEV) (window as unknown as { __map?: L.Map }).__map = map
     onDone()
     // 첫 배치는 마운트 때 한 번만(map·onDone 변화로 다시 맞추지 않는다)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -233,6 +294,23 @@ function flyVisible(map: L.Map, to: L.LatLngExpression, zoom: number, pad: { tl:
   const center = map.unproject(pt.subtract(shift), zoom)
   if (prefersReducedMotion()) map.setView(center, zoom, { animate: false })
   else map.flyTo(center, zoom, { duration: 1.1 })
+}
+
+function ZoomWatch({ onZoom }: { onZoom: (z: number) => void }) {
+  const map = useMap()
+  useEffect(() => onZoom(map.getZoom()), [map, onZoom])
+  useMapEvents({ zoomend: () => onZoom(map.getZoom()) })
+  return null
+}
+
+/** 건물 패널의 「가까이 볼 곳」: 그 구역에서 건물이 가장 많이 모인 곳으로 줌 15 */
+function Jump({ to, panel }: { to: [number, number]; panel: React.RefObject<HTMLDivElement | null> }) {
+  const map = useMap()
+  useEffect(() => {
+    const t = setTimeout(() => flyVisible(map, to, 15, padding(map, panel.current)), 30)
+    return () => clearTimeout(t)
+  }, [map, to, panel])
+  return null
 }
 
 function View({ scene, selected, data, panel }: { scene: Scene; selected: string | null; data: Indicators; panel: React.RefObject<HTMLDivElement | null> }) {
@@ -370,15 +448,17 @@ interface CjProps {
   active: string | null
   onHover: (cd: string | null) => void
   onPin: (cd: string) => void
+  /** 건물 레이어를 켠 때: 단계구분도 채움·방문 원·값 라벨을 빼고 경계선과 이름만 */
+  quiet: boolean
 }
 
 /** 2장면: 충북 시군구 단계구분도(위성 위 투명도 0.55), 원 = 월평균 방문, 콘텐츠 지점 */
-function Cheongju({ data, sgg, nat, boundary, basemap, active, onHover, onPin }: CjProps) {
+function Cheongju({ data, sgg, nat, boundary, basemap, active, onHover, onPin, quiet }: CjProps) {
   const byCd = useMemo(() => new Map(sgg.items.map((i) => [i.cd, i])), [sgg])
   const geo = useRef<L.GeoJSON>(null)
-  const live = useRef({ onHover, onPin })
+  const live = useRef({ onHover, onPin, quiet })
   useEffect(() => {
-    live.current = { onHover, onPin }
+    live.current = { onHover, onPin, quiet }
   })
   const story = mapStory(sgg, nat)
   const cj = data.airports.find((a) => a.id === data.target)
@@ -387,10 +467,11 @@ function Cheongju({ data, sgg, nat, boundary, basemap, active, onHover, onPin }:
       (f?: GeoJSON.Feature): L.PathOptions => {
         const cd = (f?.properties as BoundaryFeature['properties'] | undefined)?.cd ?? ''
         const v = byCd.get(cd)?.nat[nat]?.per_visit ?? null
-        const on = cd === active
-        return { fillColor: binColor(v, sgg.bins) ?? '#555', fillOpacity: FILL[basemap], color: '#ffffff', weight: on ? 3 : 0.8, opacity: on ? 1 : 0.8 }
+        const on = cd === active && !quiet
+        if (quiet) return { fillOpacity: 0, color: '#ffffff', weight: 1.2, opacity: 0.7, dashArray: '4 4' }
+        return { fillColor: binColor(v, sgg.bins) ?? '#555', fillOpacity: FILL[basemap], color: '#ffffff', weight: on ? 3 : 0.8, opacity: on ? 1 : 0.8, dashArray: undefined }
       },
-    [byCd, nat, active, basemap, sgg.bins],
+    [byCd, nat, active, basemap, sgg.bins, quiet],
   )
   useEffect(() => {
     geo.current?.setStyle(style as L.StyleFunction)
@@ -413,10 +494,14 @@ function Cheongju({ data, sgg, nat, boundary, basemap, active, onHover, onPin }:
         style={style as L.StyleFunction}
         onEachFeature={(f, layer) => {
           const cd = (f.properties as BoundaryFeature['properties']).cd
-          layer.on({ mouseover: () => live.current.onHover(cd), mouseout: () => live.current.onHover(null), click: () => live.current.onPin(cd) })
+          layer.on({
+            mouseover: () => !live.current.quiet && live.current.onHover(cd),
+            mouseout: () => !live.current.quiet && live.current.onHover(null),
+            click: () => !live.current.quiet && live.current.onPin(cd),
+          })
         }}
       />
-      {boundary.features.map((f) => {
+      {!quiet && boundary.features.map((f) => {
         const p = f.properties
         const v = byCd.get(p.cd)?.nat[nat]?.visit_mavg
         if (!v) return null
@@ -433,12 +518,12 @@ function Cheongju({ data, sgg, nat, boundary, basemap, active, onHover, onPin }:
       })}
       {boundary.features.map((f) => {
         const p = f.properties
-        const text = label(p.cd)
+        const text = quiet ? null : label(p.cd)
         if (!text && !LABELED.has(p.cd)) return null
         const hl = p.cd === sgg.airport_cd
         return (
           <Marker
-            key={`l-${p.cd}-${nat}`}
+            key={`l-${p.cd}-${nat}-${quiet ? 'q' : 'v'}`}
             position={[p.cy, p.cx]}
             interactive={false}
             keyboard={false}

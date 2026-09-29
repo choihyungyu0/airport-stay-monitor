@@ -211,3 +211,58 @@ export interface SidoBoundary {
 
 export type Metric = 'ratio' | 'card' | 'arr'
 export type Basemap = 'satellite' | 'gray' | 'none'
+
+/** 건물 클릭 레이어(public/data/buildings). 건물별 외국인 소비·방문 값은 없다 — 시군구 값은 화면에서 「시군구 평균」으로 붙인다. */
+export type BuildingKind = 'lodging' | 'retail_food' | 'other'
+
+export interface BuildingProps {
+  id: string
+  /** 색 구분: 숙박시설 / 근린생활·판매시설 / 그 밖 */
+  k: BuildingKind
+  /** 주용도 이름(건축물대장 주용도코드) */
+  use: string | null
+  fl: number | null
+  /** 사용승인연도 */
+  yr: number | null
+  nm: string | null
+  /** 건물 안 업소 수 [숙박, 음식, 소매] */
+  n: [number, number, number]
+  /** 상호 최대 10곳 [상호, 업종] */
+  shops: [string, string][]
+  /** 청주공항까지 직선거리(km, 소수 1자리) */
+  km: number
+  cy: number
+  cx: number
+}
+
+export interface BuildingFile {
+  type: 'FeatureCollection'
+  cd: string
+  features: { type: 'Feature'; properties: BuildingProps; geometry: { type: 'Polygon' | 'MultiPolygon'; coordinates: unknown } }[]
+}
+
+export interface BuildingArea {
+  cd: string
+  label: string
+  file: string
+  count: number
+  kinds: Partial<Record<BuildingKind, number>>
+  /** [서, 남, 동, 북] */
+  bbox: [number, number, number, number]
+  /** 바로 가기 지점 [위도, 경도] — 건물이 가장 많이 모인 곳 */
+  focus: [number, number]
+}
+
+export interface BuildingIndex {
+  collected: string
+  shops_period: string
+  sources: { building: string; shops: string }
+  categories: string[]
+  min_shops: number
+  protect_km: number
+  protected: string[]
+  /** 보호구역 안 업소 — 위치 없이 개수만 */
+  hidden_shops: Record<string, Record<string, number>>
+  match: Record<string, number>
+  areas: BuildingArea[]
+}

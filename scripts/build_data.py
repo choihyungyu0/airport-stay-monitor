@@ -617,6 +617,8 @@ def build_meta(m: Model, report: dict) -> dict:
             "관광지식정보시스템 입국관광통계(입국항 × 국가 × 월)",
             "외래관광객조사 2025 원자료(결과값만)",
             "통계청 SGIS 행정구역 경계(2025.2Q)",
+            "국토교통부 GIS건물통합정보(브이월드 WFS, 건물 레이어 — scripts/build_buildings.py)",
+            "소상공인시장진흥공단 상가(상권)정보 2026.6(건물 레이어의 숙박·음식·소매 업소)",
         ],
         "report": report,
     }

@@ -4,9 +4,10 @@ import { resolve } from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import App from '../App'
 import type { ScenarioInput } from '../lib/scenario'
-import type { Indicators, Meta } from '../lib/types'
+import type { BuildingFile, BuildingIndex, Indicators, Meta, SggData } from '../lib/types'
 import { EffectView } from '../views/EffectView'
 import { Board } from './Board'
+import { BuildingPanel, buildingTitle, maxZoomFor, PROTECT_KM } from './Buildings'
 import { Decomposition } from './Decomposition'
 import { KpiTiles } from './Kpi'
 import { asofText, canonicalHash, tabFromHash } from './Shell'
@@ -143,6 +144,39 @@ describe('지도 패널', () => {
     expect(first.textContent).toContain('청주시 청원구 (공항)')
     expect(first.textContent).toContain('8,388')
     expect(first.textContent).toContain('1,975원')
+  })
+})
+
+describe('건물 레이어(지시서 8장)', () => {
+  const sgg = read<SggData>('sgg.json')
+  const index = read<BuildingIndex>('buildings/index.json')
+  const heung = read<BuildingFile>('buildings/43113.json')
+  const lodging = data.airports.find((a) => a.id === data.target)!.lodging
+  const noop = () => {}
+  it('최대 줌: 끄면 12 · 켜면 17, 보호구역 3km', () => {
+    expect(maxZoomFor(false)).toBe(12)
+    expect(maxZoomFor(true)).toBe(17)
+    expect(index.protect_km).toBe(PROTECT_KM)
+  })
+  it('고르기 전: 가까이 볼 곳 7곳 + 공항 반경 숙박 한 줄(산출표 값 그대로)', () => {
+    render(<BuildingPanel index={index} error={false} sgg={sgg} nat="대만" zoom={9} picked={null} lodging={lodging} onJump={noop} onClear={noop} onOff={noop} />)
+    expect(screen.getAllByRole('button').filter((b) => /\d동$/.test(b.textContent ?? ''))).toHaveLength(7)
+    expect(screen.getByText('청주공항 반경 5km 숙박업소 9곳(호텔 0) · 10km 258곳(호텔 17)')).toBeTruthy()
+    expect(screen.getByRole('heading', { level: 2 }).textContent).toContain('줌 14부터')
+  })
+  it('건물을 고르면 주용도·층수·연도·공항 거리·업소, 외국인 값은 「시군구 평균」만', () => {
+    const f = heung.features.find((x) => x.properties.k === 'lodging' && x.properties.n[0] > 0)!
+    render(<BuildingPanel index={index} error={false} sgg={sgg} nat="대만" zoom={15} picked={{ p: f.properties, cd: '43113' }} lodging={lodging} onJump={noop} onClear={noop} onOff={noop} />)
+    expect(screen.getByText('주용도').nextSibling?.textContent).toBe('숙박시설')
+    expect(screen.getByText('청주공항까지 직선거리').nextSibling?.textContent).toBe(`${f.properties.km.toFixed(1)}km`)
+    expect(screen.getByText('방문 1회당 카드소비(시군구 평균)').nextSibling?.textContent).toBe('29,321원')
+    expect(screen.getByText('월평균 방문(시군구 평균)')).toBeTruthy()
+    expect(document.body.textContent).toContain('건물별 외국인 방문·소비 값은 없습니다')
+  })
+  it('건물 이름이 없으면 대표 업소 이름으로 부른다', () => {
+    const p = heung.features[0].properties
+    expect(buildingTitle({ ...p, nm: null, shops: [['메리제인호텔', '숙박']] })).toBe('메리제인호텔 건물')
+    expect(buildingTitle({ ...p, nm: null, shops: [], use: '숙박시설' })).toBe('이름 없는 숙박시설')
   })
 })
 

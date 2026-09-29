@@ -19,6 +19,9 @@ __pycache__/
 
 # 외래관광객조사 원자료 등 개인 신청 자료는 커밋 금지(IS-05)
 data/private/
+
+# 용량 큰 공개 원천(상가정보 CSV)·브이월드 WFS 캐시는 커밋하지 않는다. 산출물(public/data/buildings)만 커밋
+data/external/
 *.sav
 
 # Editor
