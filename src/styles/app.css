@@ -122,13 +122,14 @@ h1, h2, h3 { margin: 0; }
 .stage-bg button { border: 0; background: transparent; color: var(--glass-dim); padding: 5px 11px; border-radius: 999px; font-size: 12.5px; cursor: pointer; }
 .stage-bg button[aria-pressed="true"] { background: #fff; color: var(--night); font-weight: 600; }
 .stage-more { position: absolute; z-index: 700; bottom: 14px; left: 50%; transform: translateX(-50%); border: 1px solid var(--glass-line); background: var(--glass); color: #fff; border-radius: 999px; padding: 6px 14px; font-size: 13px; cursor: pointer; }
+/* 모바일: 지도(위 46%)와 패널(아래)을 나란히 쌓는다. 패널이 지도를 덮지 않으니 가려진 타일을 받지 않고,
+   글꼴이 바뀌어 패널 높이가 달라져도 지도·패널 위치가 움직이지 않는다(레이아웃 이동 0) */
 @media (max-width: 760px) {
-  .stage { min-height: 620px; }
-  .stage-panel.left, .stage-panel.right { top: auto; left: 0; right: 0; bottom: 0; width: auto; max-height: 56%; border-radius: 14px 14px 0 0; border-bottom: 0; padding: 14px 16px; }
+  .stage { min-height: 640px; display: flex; flex-direction: column; }
+  .stage-map { position: relative; inset: auto; flex: 0 0 46%; }
+  .stage-panel.left, .stage-panel.right { position: relative; top: auto; left: auto; right: auto; bottom: auto; width: auto; max-height: none; flex: 1 1 auto; min-height: 0; border-radius: 0; border: 0; border-top: 1px solid var(--glass-line); padding: 14px 16px; background: var(--night); backdrop-filter: none; -webkit-backdrop-filter: none; }
   .stage-bg, .scene-cheongju .stage-bg { top: 12px; right: 12px; left: auto; }
   .stage-more { display: none; }
-  /* 확대 단추와 출처(국토교통부 브이월드)는 하단 시트 위로 */
-  .stage .leaflet-bottom { bottom: 56%; }
 }
 
 /* 출발 안내판 패널 */

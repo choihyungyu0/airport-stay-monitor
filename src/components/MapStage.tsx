@@ -200,10 +200,11 @@ function Tiles({ basemap, labels, onFail }: { basemap: Basemap; labels: boolean;
 function InitialView({ onDone }: { onDone: () => void }) {
   const map = useMap()
   useEffect(() => {
-    const { x: w, y: h } = map.getSize()
-    const sheet = w <= 760
-    const pad = sheet
-      ? { paddingTopLeft: [16, 16] as L.PointTuple, paddingBottomRight: [16, Math.round(h * 0.56) + 12] as L.PointTuple }
+    const { x: w } = map.getSize()
+    // 모바일은 패널이 지도 아래에 따로 있어 가리는 곳이 없다. 데스크톱은 왼쪽 패널 폭만큼 비운다
+    const mobile = window.innerWidth <= 760
+    const pad = mobile
+      ? { paddingTopLeft: [12, 12] as L.PointTuple, paddingBottomRight: [12, 12] as L.PointTuple }
       : { paddingTopLeft: [Math.min(640, w - 32) + 32, 24] as L.PointTuple, paddingBottomRight: [24, 24] as L.PointTuple }
     map.fitBounds(KOREA, { ...pad, maxZoom: 7, animate: false })
     onDone()
@@ -218,6 +219,8 @@ function padding(map: L.Map, panel: HTMLElement | null): { tl: L.PointTuple; br:
   const m = map.getContainer().getBoundingClientRect()
   const p = panel?.getBoundingClientRect()
   if (!p || !p.width) return { tl: [24, 24], br: [24, 24] }
+  // 패널이 지도 밖(모바일에서 지도 아래)이면 가리는 곳이 없다
+  if (p.top >= m.bottom - 1 || p.bottom <= m.top + 1) return { tl: [16, 16], br: [16, 16] }
   const sheet = p.width > m.width * 0.8
   if (sheet) return { tl: [16, 16], br: [16, Math.max(16, m.bottom - p.top + 12)] }
   if (p.left - m.left < m.width / 2) return { tl: [Math.max(24, p.right - m.left + 16), 24], br: [24, 24] }
