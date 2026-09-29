@@ -2,3 +2,5 @@
 pyproj>=3.6
 pyshp>=2.3
 pytest>=8
+# 한글 틀을 다시 만들 때만(scripts/make_hwpx_template.py). 틀은 커밋돼 있어 CI·배포에는 필요 없다.
+# python-hwpx>=6.0

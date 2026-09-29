@@ -2,3 +2,4 @@
 data/raw/** -text
 * text=auto eol=lf
 *.png binary
+*.hwpx binary

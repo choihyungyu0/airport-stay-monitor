@@ -3,7 +3,7 @@ import { CopyBox } from '../components/CopyBox'
 import { Segmented } from '../components/Segmented'
 import { PageHead } from '../components/Shell'
 import { fmt, fmtEok, fmtHalf } from '../lib/format'
-import { effectReport } from '../lib/report'
+import { effectDoc, renderText } from '../lib/report'
 import { clampDays, compareCandidates, computeScenario, type ScenarioInput } from '../lib/scenario'
 import { daysPhrase } from '../lib/story'
 import type { Indicators, Meta } from '../lib/types'
@@ -152,12 +152,18 @@ export function EffectView({ data, meta, nat, input, onInput, onToast }: Props) 
 
       {r && (
         <section className="block" aria-label="산출 근거">
-          <CopyBox
-            label="산출 근거 · 예산 요구서·사업계획서에 붙여 넣기"
-            text={effectReport(data, nat, r, input.compare, input.arrivals != null && input.arrivals !== actual, input.budget)}
-            filename={`체류효과_산출근거_${nat}.txt`}
-            onToast={onToast}
-          />
+          {(() => {
+            const doc = effectDoc(data, meta, nat, r, input.compare, input.arrivals != null && input.arrivals !== actual, input.budget)
+            return (
+              <CopyBox
+                label="산출 근거 · 예산 요구서·사업계획서용"
+                text={renderText(doc)}
+                doc={doc}
+                filename={`공항체류전환_체류효과_산출근거_${nat}`}
+                onToast={onToast}
+              />
+            )
+          })()}
         </section>
       )}
     </>

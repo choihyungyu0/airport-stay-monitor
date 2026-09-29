@@ -2,7 +2,7 @@ import { CopyBox } from '../components/CopyBox'
 import { Segmented } from '../components/Segmented'
 import { PageHead } from '../components/Shell'
 import { buildCsv, downloadCsv } from '../lib/csv'
-import { effectReport, halfReport, monthlyReport } from '../lib/report'
+import { effectDoc, halfDoc, monthlyDoc, renderText } from '../lib/report'
 import { computeScenario, type ScenarioInput } from '../lib/scenario'
 import type { Indicators, Meta, SggData } from '../lib/types'
 
@@ -23,19 +23,20 @@ interface Props {
 export function ReportView({ data, sgg, meta, nat, kind, onKind, scenario, onToast }: Props) {
   const actual = data.airports.find((a) => a.id === data.target)?.nat[nat]?.halves?.[data.halves.target]?.arrivals ?? 0
   const r = computeScenario(data, nat, scenario.days, scenario.compare, scenario.arrivals)
-  const text =
+  const doc =
     kind === 'monthly'
-      ? monthlyReport(data, meta)
+      ? monthlyDoc(data, meta)
       : kind === 'half'
-        ? halfReport(data, sgg, meta, nat, computeScenario(data, nat, data.scenario.default_days, data.scenario.default_compare))
+        ? halfDoc(data, sgg, meta, nat, computeScenario(data, nat, data.scenario.default_days, data.scenario.default_compare))
         : r
-          ? effectReport(data, nat, r, scenario.compare, scenario.arrivals != null && scenario.arrivals !== actual, scenario.budget)
-          : `${nat} 자료가 없어 효과를 계산하지 못했습니다.`
+          ? effectDoc(data, meta, nat, r, scenario.compare, scenario.arrivals != null && scenario.arrivals !== actual, scenario.budget)
+          : null
+  const text = doc ? renderText(doc) : `${nat} 자료가 없어 효과를 계산하지 못했습니다.`
   const names: Record<ReportKind, string> = { monthly: '월간동향', half: `반기분석_${nat}`, effect: `체류효과_${nat}` }
   const labels: Record<ReportKind, string> = { monthly: '월간 동향', half: `반기 분석 · ${nat}`, effect: `사업 효과 근거 · ${nat}` }
   return (
     <>
-      <PageHead title="보고 문안" sub="한글 문서에 그대로 붙여 넣는 개조식 · 숫자는 화면 값과 같습니다" meta={meta}>
+      <PageHead title="보고 문안" sub="한글 파일(.hwpx)로 저장하거나 복사해 붙여 넣는 개조식 · 숫자는 화면 값과 같습니다" meta={meta}>
         <button
           type="button"
           className="btn ghost"
@@ -66,7 +67,7 @@ export function ReportView({ data, sgg, meta, nat, kind, onKind, scenario, onToa
           {kind === 'effect' && '「효과 계산」 탭에서 넣은 조건으로 만듭니다. 예산 요구서·사업계획서용.'}
         </p>
       </div>
-      <CopyBox label={labels[kind]} text={text} filename={`${names[kind]}_${data.halves.target}.txt`} onToast={onToast} />
+      <CopyBox label={labels[kind]} text={text} doc={doc} filename={`공항체류전환_${names[kind]}_${data.halves.target}`} onToast={onToast} />
     </>
   )
 }

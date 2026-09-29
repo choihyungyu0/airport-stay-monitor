@@ -17,7 +17,7 @@
 | 현황 | `#overview` | 반기 핵심 지표 4개(입국·권역 카드소비·① 1인당·② 체류 인·일)와 최근 달 값, 공항 비교 안내판, 월별 추이, 1인당 소비 변화 요인. 요약 한 줄 복사 |
 | 시군구 | `#sgg` | 충북 14개 시군구 지도(V-World 지도·위성 배경)와 정렬되는 표. 사업을 둘 곳 고르기, CSV |
 | 효과 계산 | `#effect` | 대상 입국자·늘어날 체류일·상한 공항·사업비를 넣으면 추가 카드소비와 사업비 대비 배수, 예산 요구서용 산출 근거 |
-| 보고 문안 | `#report` | 월간 동향 · 반기 분석 · 사업 효과 근거를 □○-※ 개조식으로 작성. 복사해 한글 문서에 붙여 넣거나 .txt 저장 |
+| 보고 문안 | `#report` | 월간 동향 · 반기 분석 · 사업 효과 근거를 □○-※ 개조식으로 작성. **한글 파일(.hwpx)** 저장, 복사, .txt 저장 |
 | 자료·검증 | `#data` | 검증 6종, 데이터 점검, 산식, 출처, 한계, 연동 검정 전체 표 |
 
 국적(대만·일본)은 어느 탭에서든 상단에서 바꿉니다. 문안과 요약 문장은 `src/lib/report.ts`·`story.ts`가 산출 JSON에서 만들므로 숫자가 화면 값과 어긋나지 않습니다. 명세서의 해시 앵커(`#summary` `#trend` `#map` `#method`)도 해당 탭으로 열립니다.
@@ -84,7 +84,7 @@ npm run preview
 
 ### V-World 배경지도(UI-05, 선택)
 
-`.env.local`에 국토교통부 브이월드 인증키를 넣으면 지도 배경에 「지도」(WMTS `white`, 어두운 화면에서는 `midnight`)와 「위성」(`Satellite`)을 쓸 수 있습니다. Vercel에서는 프로젝트 환경변수 `VITE_VWORLD_KEY`로 넣고, 브이월드에 배포 도메인을 서비스 URL로 등록합니다.
+`.env.local`에 국토교통부 브이월드 인증키(이 서비스 전용 개발키, 서비스 URL `airport-stay-monitor.vercel.app`, 2027-03-29 만료 — 만료 전 브이월드 마이포털에서 연장)를 넣으면 지도 배경에 「지도」(WMTS `white`, 어두운 화면에서는 `midnight`)와 「위성」(`Satellite`)을 쓸 수 있습니다. Vercel에서는 프로젝트 환경변수 `VITE_VWORLD_KEY`로 넣고, 브이월드에 배포 도메인을 서비스 URL로 등록합니다.
 
 ```
 VITE_VWORLD_KEY=발급받은-키
@@ -140,6 +140,15 @@ reference/       시제품 airport_monitor.html · compute_indicators.py(정답 
 | UI-12 | `data/config/airports.json` + `test_ui12_extra_airport_without_region_data` |
 | ST-01~10 | 스켈레톤 · 새로고침 안내 · 자료 없음 카드 · 참고값 칩 · 소표본 툴팁 · 경계 실패 안내 · 배경 실패 토스트 · 불일치 배지 · 기준일 확인 필요 |
 | OPS-01~04 | 위 갱신 절차 · `vercel.json` · 접근성(Lighthouse 접근성 100, 400px 가로 스크롤 0) · pytest/Vitest |
+
+## 한글(.hwpx) 내보내기
+
+「보고 문안」과 「효과 계산」 탭의 **한글 파일(.hwpx)** 버튼은 브라우저에서 바로 한글 문서를 만듭니다(서버를 거치지 않음).
+
+- 틀: `public/templates/report.hwpx` — `python scripts/make_hwpx_template.py`(python-hwpx)로 만든 유효한 HWPX 골격. 제목 16pt 굵게, □ 소제목, ○·- 내어쓰기 본문, 머리글 음영·반복 표, ※ 주석
+- 채우기: `src/lib/hwpx.ts`가 `Contents/section0.xml`의 `{{토큰}}` 문단과 표 행을 줄 수만큼 복제해 넣고, `mimetype`을 맨 앞·비압축으로 다시 묶는다
+- 문안·표 숫자는 복사용 텍스트와 같은 구조(`src/lib/report.ts`의 `ReportDoc`)에서 나온다. 표는 셀 병합 없이 첫 행이 머리글이고 숫자 칸에는 단위가 없다(단위는 머리글에)
+- 확인: 세 문서를 한컴오피스 한글로 열어 PDF로 저장해 1쪽 레이아웃까지 확인함. 테스트는 `src/lib/hwpx.test.ts`, `tests/test_hwpx_template.py`
 
 ## 데이터 원칙
 
