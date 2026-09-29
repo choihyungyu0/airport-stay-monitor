@@ -80,6 +80,7 @@ export function MapStage({ data, sgg, meta, nat, boundary, sido, onToast }: Prop
         maxZoom={MAX_ZOOM}
         minZoom={6}
         zoomSnap={0.25}
+        fadeAnimation={false}
         scrollWheelZoom={false}
         dragging={!L.Browser.mobile}
         zoomControl={false}
@@ -145,7 +146,14 @@ export function MapStage({ data, sgg, meta, nat, boundary, sido, onToast }: Prop
       <button
         type="button"
         className="stage-more"
-        onClick={() => document.getElementById('summary-below')?.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth' })}
+        onClick={() => {
+          const go = (n: number) => {
+            const el = document.getElementById('summary-below')
+            if (el) el.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth' })
+            else if (n > 0) setTimeout(() => go(n - 1), 150)
+          }
+          go(20)
+        }}
       >
         현황 요약 ↓
       </button>

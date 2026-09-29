@@ -1,16 +1,35 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { canonicalHash, tabFromHash, TopBar, type Tab } from './components/Shell'
 import { Toast } from './components/Toast'
 import { loadBoundary, loadCore, loadSido, type CoreData } from './lib/data'
 import { loadFonts } from './lib/fonts'
 import type { ScenarioInput } from './lib/scenario'
 import type { Boundary, SidoBoundary } from './lib/types'
-import { DataView } from './views/DataView'
-import { EffectView } from './views/EffectView'
-import { Footer } from './views/Footer'
 import { MapStage } from './components/MapStage'
+import { Footer } from './views/Footer'
 import { MapBelow } from './views/MapView'
-import { ReportView, type ReportKind } from './views/ReportView'
+import type { ReportKind } from './views/ReportView'
+
+// 지도 탭이 아닌 화면은 처음 열 때 받는다(첫 화면 JS를 줄임)
+const EffectView = lazy(() => import('./views/EffectView').then((m) => ({ default: m.EffectView })))
+const ReportView = lazy(() => import('./views/ReportView').then((m) => ({ default: m.ReportView })))
+const DataView = lazy(() => import('./views/DataView').then((m) => ({ default: m.DataView })))
+
+/** 첫 화면(위성 타일)을 먼저 그리고, 아래쪽 내용은 브라우저가 한가할 때 그린다 */
+function useIdle(enabled: boolean): boolean {
+  const [idle, setIdle] = useState(false)
+  useEffect(() => {
+    if (!enabled || idle) return
+    const w = window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number; cancelIdleCallback?: (id: number) => void }
+    if (w.requestIdleCallback) {
+      const id = w.requestIdleCallback(() => setIdle(true), { timeout: 2500 })
+      return () => w.cancelIdleCallback?.(id)
+    }
+    const t = setTimeout(() => setIdle(true), 800)
+    return () => clearTimeout(t)
+  }, [enabled, idle])
+  return idle
+}
 
 type Load = { state: 'loading' } | { state: 'error' } | { state: 'ok'; core: CoreData }
 
@@ -87,6 +106,7 @@ export default function App() {
 
   const core = load.state === 'ok' ? load.core : null
   const data = core?.indicators ?? null
+  const belowReady = useIdle(!!data && tab === 'map')
 
   return (
     <>
@@ -115,9 +135,10 @@ export default function App() {
           )}
         </main>
       )}
-      {data && core && tab === 'map' && <MapBelow data={data} meta={core.meta} nat={nat} onToast={setToast} />}
+      {data && core && tab === 'map' && belowReady && <MapBelow data={data} meta={core.meta} nat={nat} onToast={setToast} />}
       {data && core && tab !== 'map' && (
         <main className="page" id="main">
+          <Suspense fallback={<div className="loading" aria-busy="true" aria-label="불러오는 중"><div className="skel" style={{ height: 320 }} /></div>}>
           {tab === 'effect' && <EffectView data={data} meta={core.meta} nat={nat} input={scenario} onInput={setScenario} onToast={setToast} />}
           {tab === 'report' && (
             <ReportView
@@ -132,6 +153,7 @@ export default function App() {
             />
           )}
           {tab === 'data' && <DataView meta={core.meta} />}
+          </Suspense>
           <Footer />
         </main>
       )}
