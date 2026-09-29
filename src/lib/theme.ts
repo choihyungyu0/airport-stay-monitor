@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
 // Leaflet은 SVG 속성에 색을 직접 쓰므로 CSS 변수를 실제 색으로 풀어 줘야 한다.
-// 시스템 테마나 data-theme이 바뀌면 다시 읽는다.
+// 시스템 테마가 바뀌면 다시 읽는다.
 
 const KNOWN = new Set(['accent', 'daegu', 'gimhae', 'jeju'])
 const EXTRA = ['ap5', 'ap6', 'ap7']
@@ -22,40 +22,11 @@ export function useThemeVersion(): number {
     const bump = () => setV((x) => x + 1)
     const mq = typeof matchMedia === 'function' ? matchMedia('(prefers-color-scheme: dark)') : null
     mq?.addEventListener('change', bump)
-    const mo = new MutationObserver(bump)
-    mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
-    return () => {
-      mq?.removeEventListener('change', bump)
-      mo.disconnect()
-    }
+    return () => mq?.removeEventListener('change', bump)
   }, [])
   return v
 }
 
-const KEY = 'asm-theme'
-
-export function readSavedTheme(): 'light' | 'dark' | null {
-  try {
-    const t = localStorage.getItem(KEY)
-    return t === 'light' || t === 'dark' ? t : null
-  } catch {
-    return null
-  }
-}
-
-export function applyTheme(t: 'light' | 'dark' | null): void {
-  if (t) document.documentElement.setAttribute('data-theme', t)
-  else document.documentElement.removeAttribute('data-theme')
-  try {
-    if (t) localStorage.setItem(KEY, t)
-    else localStorage.removeItem(KEY)
-  } catch {
-    /* 저장 불가(사생활 보호 모드 등)면 이번 방문에만 적용 */
-  }
-}
-
 export function effectiveTheme(): 'light' | 'dark' {
-  const t = document.documentElement.getAttribute('data-theme')
-  if (t === 'light' || t === 'dark') return t
   return typeof matchMedia === 'function' && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }

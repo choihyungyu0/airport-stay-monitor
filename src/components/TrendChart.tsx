@@ -33,13 +33,13 @@ function useWidth<T extends HTMLElement>() {
 /** LGD-01 공항 색 범례. 참고값은 점선 견본과 "(참고)" 표기. */
 export function ChartLegend({ series }: { series: Series[] }) {
   return (
-    <div className="legend" data-ui="LGD-01">
+    <div className="legend" data-ui="LGD-01" style={{ marginTop: 4 }}>
       {series.map((s, i) => {
         const color = `var(${airportVar(s.airport.color, i)})`
         const ref = s.available && !s.passed
         return (
           <span key={s.airport.id}>
-            <i className={ref ? 'dash' : ''} style={ref ? { borderColor: color } : { background: color }} />
+            <i className={ref ? 'ln dash' : 'ln'} style={ref ? { borderColor: color } : { background: color }} />
             {s.airport.name}
             {!s.available ? ' (자료 없음)' : ref ? ' (참고)' : ''}
           </span>

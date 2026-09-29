@@ -5,6 +5,7 @@ import { buildCsv, csvCell } from './csv'
 import { fmt, fmtEok, fmtHalf, fmtYm, signed, signedPct } from './format'
 import { clampDays, computeScenario } from './scenario'
 import { axisTop, buildSeries, dividerIndex, niceStep } from './series'
+import { daysPhrase, decompCaption, decompRows, decompTitle, mapStory, times } from './story'
 import type { Indicators, Meta, SggData } from './types'
 
 const read = <T,>(name: string): T => JSON.parse(readFileSync(resolve(process.cwd(), 'public/data', name), 'utf8')) as T
@@ -79,5 +80,26 @@ describe('UI-11 CSV', () => {
     expect(text).toContain('청주시 청원구,43114,8388,99418707,1975,Y,원천 시군구 행')
     expect(csvCell('a,b')).toBe('"a,b"')
     expect(csvCell('say "hi"')).toBe('"say ""hi"""')
+  })
+})
+
+describe('섹션 결론 문장(story)', () => {
+  it('지도: 방문은 청원구(공항)에, 지갑은 흥덕구에서 — 15배', () => {
+    const s = mapStory(sgg, '대만')!
+    expect(s.visitTop.name).toBe('청원구')
+    expect(s.spendTop.name).toBe('흥덕구')
+    expect(times(s.ratio!)).toBe('14.8배')
+    expect(s.title).toBe('방문은 청원구(공항)에 몰리고, 지갑은 흥덕구에서 열립니다.')
+  })
+  it('요인분해: 가장 큰 몫은 일본 1인당 감소', () => {
+    const d = data.decomposition
+    if (d.skipped) throw new Error('분해 생략됨')
+    expect(decompTitle(d)).toBe('일본 입국자의 1인당 소비 감소(−10,440원)입니다.')
+    expect(decompCaption(d)).toContain('74,701원 → 66,903원(−7,798원, −10.4%)')
+    expect(decompRows(d).filter((r) => r.lead).map((r) => r.key)).toEqual(['일본'])
+  })
+  it('시나리오 문구', () => {
+    expect(daysPhrase(0.5)).toBe('반나절 더 머물면')
+    expect(daysPhrase(2)).toBe('이틀 더 머물면')
   })
 })
