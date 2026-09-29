@@ -13,6 +13,14 @@ export interface ScenarioResult {
   compareIsReference: boolean
 }
 
+/** 효과 계산 입력. arrivals가 null이면 비교 반기 실적을 쓴다. budget은 억 원. */
+export interface ScenarioInput {
+  days: number
+  compare: string
+  arrivals: number | null
+  budget: number | null
+}
+
 export function clampDays(d: number, min = 0, max = 2): number {
   if (Number.isNaN(d)) return min
   return Math.min(max, Math.max(min, d))
@@ -23,6 +31,7 @@ export function computeScenario(
   nat: string,
   days: number,
   compareId: string,
+  arrivalsOverride: number | null = null,
 ): ScenarioResult | null {
   const target = data.airports.find((a) => a.id === data.target)
   const compare = data.airports.find((a) => a.id === compareId)
@@ -31,10 +40,11 @@ export function computeScenario(
   const c = compare.nat[nat]?.halves?.[data.halves.target]
   if (!t?.per_day || !c?.per_day) return null
   const d = clampDays(days, data.scenario.min_days, data.scenario.max_days)
-  const a = t.arrivals * d * t.per_day
-  const b = t.arrivals * d * c.per_day
+  const n = arrivalsOverride != null && arrivalsOverride >= 0 ? arrivalsOverride : t.arrivals
+  const a = n * d * t.per_day
+  const b = n * d * c.per_day
   return {
-    arrivals: t.arrivals,
+    arrivals: n,
     days: d,
     perDayTarget: t.per_day,
     perDayCompare: c.per_day,

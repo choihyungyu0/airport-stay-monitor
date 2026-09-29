@@ -6,6 +6,7 @@ import { fmt, fmtEok, fmtHalf, fmtYm, signed, signedPct } from './format'
 import { clampDays, computeScenario } from './scenario'
 import { axisTop, buildSeries, dividerIndex, niceStep } from './series'
 import { daysPhrase, decompCaption, decompRows, decompTitle, mapStory, times } from './story'
+import { effectReport, halfReport, monthlyReport, summaryLine } from './report'
 import type { Indicators, Meta, SggData } from './types'
 
 const read = <T,>(name: string): T => JSON.parse(readFileSync(resolve(process.cwd(), 'public/data', name), 'utf8')) as T
@@ -101,5 +102,35 @@ describe('섹션 결론 문장(story)', () => {
   it('시나리오 문구', () => {
     expect(daysPhrase(0.5)).toBe('반나절 더 머물면')
     expect(daysPhrase(2)).toBe('이틀 더 머물면')
+  })
+})
+
+describe('보고 문안(report)', () => {
+  it('현황 한 줄', () => {
+    expect(summaryLine(data, '대만')).toBe(
+      '2026 상반기 청주공항 대만 입국 27,700명(전년 동기의 2.1배), 입국 1인당 충북 카드소비 36,790원(전년 수준, +1.3%), 체류 2.55인·일(전년 3.06).',
+    )
+    expect(summaryLine(data, '일본')).toContain('113,144원(전년 동기 대비 −19%)')
+  })
+  it('월간 동향: 최근 달 + 반기 누계, 대만·일본', () => {
+    const t = monthlyReport(data, meta)
+    expect(t.split('\n')[0]).toBe('□ 청주공항 외래객 충북 체류·소비 동향(2026년 7월)')
+    expect(t).toContain('○ 입국: 대만 5,139명(전년 동월 대비 −12%), 일본 2,509명(전년 동월 대비 −9%)')
+    expect(t).toContain('○ 대만: 입국 27,700명(전년 동기 대비 +105%), 1인당 카드소비 36,790원(전년 동기 36,316원), 체류 2.55인·일(3.06)')
+    expect(t).toContain('※ 자료: 한국관광 데이터랩')
+  })
+  it('반기 분석: 비교·권역 내·변화 요인', () => {
+    const t = halfReport(data, sgg, meta, '대만', computeScenario(data, '대만', 0.5, 'pus'))
+    expect(t).toContain('김해공항 입국자의 부산 소비 440,089원(12배), 대구공항 입국자의 대구 소비 129,664원(3.5배)')
+    expect(t).toContain('방문은 청원구(공항 소재, 월평균 8,388명)에 몰리나 방문 1회당 소비는 1,975원이고, 흥덕구는 29,321원으로 14.8배')
+    expect(t).toContain('74,701원 → 66,903원(−7,798원) 중 일본 입국자의 1인당 소비 감소가 −10,440원')
+    expect(t).toContain('추가 카드소비 2.0억~11.2억 원')
+    expect(t).not.toContain('제주공항') // 참고값 공항은 비교에서 뺀다
+  })
+  it('사업 효과 근거: 입력값·사업비 반영', () => {
+    const r = computeScenario(data, '대만', 1, 'pus', 60000)!
+    const t = effectReport(data, '대만', r, 'pus', true, 2)
+    expect(t).toContain('청주공항 대만 입국 60,000명(입력값) × 1.0일 × 14,427~81,048원 = 8.7억~48.6억 원')
+    expect(t).toMatch(/사업비 2억 원 대비 추가 소비 4\.3~24\.3배/)
   })
 })

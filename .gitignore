@@ -29,3 +29,5 @@ data/private/
 
 # 로컬 도구 설정
 .claude/
+
+.vercel
