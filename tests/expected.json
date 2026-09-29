@@ -1,0 +1,33 @@
+{
+  "_doc": "기능명세서 ⑨ 개발가이드 기대값(2026.9 추출분). 데이터를 갱신하면 이 파일만 교체한다(OPS-04).",
+  "arrivals_total": { "airport": "cjj", "values": { "2025H1": 30030, "2026H1": 62891 } },
+  "half": [
+    { "airport": "cjj", "nat": "대만", "half": "2026H1", "per": 36790, "ratio": 2.55, "arrivals": 27700 },
+    { "airport": "cjj", "nat": "대만", "half": "2025H1", "per": 36316, "ratio": 3.06, "arrivals": 13494 },
+    { "airport": "cjj", "nat": "일본", "half": "2026H1", "per": 113144 },
+    { "airport": "pus", "nat": "대만", "half": "2026H1", "per": 440089, "ratio": 5.43 },
+    { "airport": "tae", "nat": "대만", "half": "2026H1", "per": 129664, "ratio": 4.71 },
+    { "airport": "cju", "nat": "대만", "half": "2026H1", "per": 377357, "ratio": 5.8 }
+  ],
+  "arrivals_growth": { "airport": "cjj", "nat": "대만", "pct": 105 },
+  "v2": [
+    { "airport": "cjj", "nat": "대만", "lv": 0.75, "li": 0.40, "dv": 0.83, "di": 0.49, "pass": true },
+    { "airport": "cju", "nat": "대만", "dv": 0.30, "di": 0.41, "pass": false }
+  ],
+  "kitagawa": {
+    "R0": 74701, "R1": 66903, "total": -7798, "pct": -10.4, "comp": 2348,
+    "rate": { "대만": 294, "일본": -10440 },
+    "tolerance": 1
+  },
+  "card_correction": { "region": "충북", "half": "2026H1", "before_eok": 59.4, "after_eok": 191.1, "nat": "대만", "nat_won": 1019084278 },
+  "visits": { "region": "충북", "nat": "대만", "month": "202603", "value": 11157 },
+  "sgg": [
+    { "cd": "43114", "nat": "대만", "visit_mavg": 8388, "card_mil": 99.4, "per_visit": 1975 },
+    { "cd": "43113", "nat": "대만", "per_visit": 29321 },
+    { "cd": "43111", "nat": "대만", "per_visit": 20393 }
+  ],
+  "sgg_top": { "nat": "대만", "first_cd": "43114" },
+  "scenario": { "airport": "cjj", "nat": "대만", "days": 0.5, "compare": "pus", "low_eok": 2.0, "high_eok": 11.2, "per_day_low": 14427, "per_day_high": 81048 },
+  "easypay": { "region": "충북", "nat": "대만", "half": "2026H1", "effect_pct": 0.55 },
+  "boundary": { "count": 14, "cheongju_gu": ["43111", "43112", "43113", "43114"] }
+}

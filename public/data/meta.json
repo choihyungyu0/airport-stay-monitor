@@ -1,0 +1,479 @@
+{
+ "asof": {
+  "arrivals_latest": "202607",
+  "datalab_latest": "202608",
+  "datalab_extract": "2026.08",
+  "card_extracted_on": "2026-09-29",
+  "card_rebase_date": "2026-08-11",
+  "halves": [
+   "2025H1",
+   "2026H1"
+  ],
+  "sgg_period": "2026H1"
+ },
+ "sources": [
+  "한국관광 데이터랩 외래객 지역별 방한현황(국가별 외국인 방문 현황, 외국인 신용카드 국가별 관광소비 현황, 외국인 업종별 신용카드 관광소비 추이, 외국인 간편결제)",
+  "관광지식정보시스템 입국관광통계(입국항 × 국가 × 월)",
+  "외래관광객조사 2025 원자료(결과값만)",
+  "통계청 SGIS 행정구역 경계(2025.2Q)"
+ ],
+ "report": {
+  "checks": [
+   {
+    "id": "C1",
+    "name": "행수",
+    "status": "pass",
+    "detail": "입국 8,528행 적재 · 데이터랩 37,793행 · 간편결제 2,772행",
+    "files": [
+     {
+      "file": "entry_airport_country_monthly_2023_2026.csv",
+      "rows": 9471,
+      "loaded": 8528
+     },
+     {
+      "file": "datalab_foreign_all_sido_sgg.csv",
+      "rows": 37793,
+      "by": {
+       "sgg/card": 5263,
+       "sgg/ind": 326,
+       "sgg/vis": 5529,
+       "sido/card": 12770,
+       "sido/ind": 693,
+       "sido/vis": 13212
+      }
+     },
+     {
+      "file": "datalab_foreign_easypay_by_country_industry_monthly.csv",
+      "rows": 2772
+     },
+     {
+      "file": "충북_시군구_외국인_2026H1.csv",
+      "rows": 14
+     }
+    ]
+   },
+   {
+    "id": "C2",
+    "name": "월 연속성",
+    "status": "pass",
+    "detail": "빠진 달 없음 · 입국 202301~202607 · 데이터랩 202301~202608"
+   },
+   {
+    "id": "C3",
+    "name": "결측",
+    "status": "pass",
+    "detail": "비교 반기 결측 없음"
+   },
+   {
+    "id": "C4",
+    "name": "시도-시군구 정합성",
+    "status": "pass",
+    "detail": "대조 2건 중 불일치 0건 · 생략 3건(시군구 자료 없음)",
+    "items": [
+     {
+      "sido": "부산",
+      "period": "202603",
+      "status": "skip",
+      "sido_value": 96186178411,
+      "detail": "시군구 카드 자료 미적재 — 데이터랩에서 시군구 CSV를 받으면 자동 대조"
+     },
+     {
+      "sido": "대구",
+      "period": "202603",
+      "status": "skip",
+      "sido_value": 8016428550,
+      "detail": "시군구 카드 자료 미적재 — 데이터랩에서 시군구 CSV를 받으면 자동 대조"
+     },
+     {
+      "sido": "제주",
+      "period": "202603",
+      "status": "skip",
+      "sido_value": 45101409240,
+      "detail": "시군구 카드 자료 미적재 — 데이터랩에서 시군구 CSV를 받으면 자동 대조"
+     },
+     {
+      "sido": "충북",
+      "period": "2026H1",
+      "status": "ok",
+      "sido_value": 5938399642,
+      "sgg_sum": 5938389434,
+      "detail": "시도 카드 59.4억 = 청주 외 10개 시군구 합 59.4억 → 청주 4구가 빠져 있음(보정 근거)"
+     },
+     {
+      "sido": "충북",
+      "period": "2026H1",
+      "status": "ok",
+      "detail": "시군구 정리표 ↔ 원천 시군구 행 14/14 일치"
+     }
+    ]
+   },
+   {
+    "id": "C5",
+    "name": "카드 추출 시점",
+    "status": "pass",
+    "detail": "추출 2026-09-29 ≥ 재소급 2026-08-11"
+   },
+   {
+    "id": "C6",
+    "name": "외국인 정의 변경",
+    "status": "pass",
+    "detail": "비교 반기 2025H1·2026H1 모두 2024-12-19 이후"
+   },
+   {
+    "id": "C7",
+    "name": "경계 코드 대응",
+    "status": "pass",
+    "detail": "충북 14개 시군구 전부 조인(SGIS → 행정표준)"
+   },
+   {
+    "id": "C8",
+    "name": "지역·국가명 매핑",
+    "status": "pass",
+    "detail": "국가 표기 통일 461행(터키→튀르키예 등), 통일 표기와 겹친 17행은 제외"
+   }
+  ],
+  "consistency": {
+   "mismatch": 0,
+   "skipped": 3,
+   "checked": 2
+  },
+  "validations": [
+   {
+    "id": "V1",
+    "title": "분모 재현",
+    "status": "pass",
+    "summary": "입국관광통계 합 30,030 / 62,891명, 공사 발표 30,117 / 62,971명(청주, 반기). 오차 0.3% 이내",
+    "rows": [
+     {
+      "half": "2025H1",
+      "ours": 30030,
+      "published": 30117,
+      "error": 0.0029
+     },
+     {
+      "half": "2026H1",
+      "ours": 62891,
+      "published": 62971,
+      "error": 0.0013
+     }
+    ]
+   },
+   {
+    "id": "V2",
+    "title": "공항 연동 검정",
+    "status": "pass",
+    "summary": "월 수준·전월 차분 상관 모두 지역공항이 인천보다 크고 차분 상관 0.5 이상일 때만 채택. 8개 공항·국적 중 6개 채택"
+   },
+   {
+    "id": "V3",
+    "title": "시도-시군구 정합성",
+    "status": "pass",
+    "summary": "시도 카드값에서 청주 4구·창원 5구가 빠지는 것을 확인하고 시군구 값으로 보정(충북 2026 상반기 59.4억 → 191.1억 원)",
+    "before": 5938399642,
+    "after": 19109837751
+   },
+   {
+    "id": "V4",
+    "title": "결제수단·거주자",
+    "status": "pass",
+    "summary": "간편결제를 더해도 충북 대만 소비 +0.55%(간편결제 단위 천원 추정). 장기체류자 결제가 섞이는 국적은 1인당 미산출",
+    "effect": 0.00554
+   },
+   {
+    "id": "V5",
+    "title": "가이드라인",
+    "status": "pass",
+    "summary": "방문자는 시간·공간 합산 없이 월평균 비율만 사용, 외국인 정의 변경(2024.12.19) 이후 구간만 비교"
+   },
+   {
+    "id": "V6",
+    "title": "국가승인통계 대조",
+    "status": "static",
+    "summary": "대만 12개 시도의 방문 인·일 ÷ 전국 입국과 외래관광객조사 1인당 시도 체재일의 상관 0.92(순위 0.93). 원자료는 개인 신청 자료라 결과값만 싣습니다",
+    "r": 0.92,
+    "rho": 0.93
+   }
+  ],
+  "v2_table": [
+   {
+    "airport": "청주",
+    "nat": "대만",
+    "lv": 0.75,
+    "li": 0.4,
+    "dv": 0.83,
+    "di": 0.49,
+    "pass": true,
+    "status": "채택",
+    "n": 31,
+    "sensitivity": {
+     "0.4": true,
+     "0.5": true,
+     "0.6": true
+    }
+   },
+   {
+    "airport": "청주",
+    "nat": "일본",
+    "lv": 0.74,
+    "li": 0.48,
+    "dv": 0.54,
+    "di": 0.43,
+    "pass": true,
+    "status": "채택",
+    "n": 31,
+    "sensitivity": {
+     "0.4": true,
+     "0.5": true,
+     "0.6": false
+    }
+   },
+   {
+    "airport": "청주",
+    "nat": "중국",
+    "lv": 0.15,
+    "li": -0.01,
+    "dv": -0.01,
+    "di": -0.23,
+    "pass": false,
+    "status": "참고값",
+    "n": 31,
+    "sensitivity": {
+     "0.4": false,
+     "0.5": false,
+     "0.6": false
+    }
+   },
+   {
+    "airport": "청주",
+    "nat": "베트남",
+    "lv": -0.09,
+    "li": 0.27,
+    "dv": 0.07,
+    "di": -0.12,
+    "pass": false,
+    "status": "참고값",
+    "n": 31,
+    "sensitivity": {
+     "0.4": false,
+     "0.5": false,
+     "0.6": false
+    }
+   },
+   {
+    "airport": "대구",
+    "nat": "대만",
+    "lv": 0.83,
+    "li": -0.15,
+    "dv": 0.64,
+    "di": 0.45,
+    "pass": true,
+    "status": "채택",
+    "n": 31,
+    "sensitivity": {
+     "0.4": true,
+     "0.5": true,
+     "0.6": true
+    }
+   },
+   {
+    "airport": "대구",
+    "nat": "일본",
+    "lv": 0.66,
+    "li": 0.63,
+    "dv": 0.58,
+    "di": 0.55,
+    "pass": true,
+    "status": "채택",
+    "n": 31,
+    "sensitivity": {
+     "0.4": true,
+     "0.5": true,
+     "0.6": false
+    }
+   },
+   {
+    "airport": "대구",
+    "nat": "중국",
+    "lv": 0.49,
+    "li": 0.27,
+    "dv": 0.37,
+    "di": 0.03,
+    "pass": false,
+    "status": "참고값",
+    "n": 31,
+    "sensitivity": {
+     "0.4": false,
+     "0.5": false,
+     "0.6": false
+    }
+   },
+   {
+    "airport": "대구",
+    "nat": "베트남",
+    "lv": -0.1,
+    "li": 0.22,
+    "dv": -0.25,
+    "di": -0.08,
+    "pass": false,
+    "status": "참고값",
+    "n": 31,
+    "sensitivity": {
+     "0.4": false,
+     "0.5": false,
+     "0.6": false
+    }
+   },
+   {
+    "airport": "김해",
+    "nat": "대만",
+    "lv": 0.89,
+    "li": 0.78,
+    "dv": 0.61,
+    "di": 0.41,
+    "pass": true,
+    "status": "채택",
+    "n": 31,
+    "sensitivity": {
+     "0.4": true,
+     "0.5": true,
+     "0.6": true
+    }
+   },
+   {
+    "airport": "김해",
+    "nat": "일본",
+    "lv": 0.83,
+    "li": 0.63,
+    "dv": 0.71,
+    "di": 0.6,
+    "pass": true,
+    "status": "채택",
+    "n": 31,
+    "sensitivity": {
+     "0.4": true,
+     "0.5": true,
+     "0.6": true
+    }
+   },
+   {
+    "airport": "김해",
+    "nat": "중국",
+    "lv": 0.9,
+    "li": 0.89,
+    "dv": 0.78,
+    "di": 0.63,
+    "pass": true,
+    "status": "채택",
+    "n": 31,
+    "sensitivity": {
+     "0.4": true,
+     "0.5": true,
+     "0.6": true
+    }
+   },
+   {
+    "airport": "김해",
+    "nat": "베트남",
+    "lv": 0.45,
+    "li": 0.29,
+    "dv": -0.1,
+    "di": 0.14,
+    "pass": false,
+    "status": "참고값",
+    "n": 31,
+    "sensitivity": {
+     "0.4": false,
+     "0.5": false,
+     "0.6": false
+    }
+   },
+   {
+    "airport": "제주",
+    "nat": "대만",
+    "lv": 0.58,
+    "li": 0.49,
+    "dv": 0.3,
+    "di": 0.41,
+    "pass": false,
+    "status": "참고값",
+    "n": 31,
+    "sensitivity": {
+     "0.4": false,
+     "0.5": false,
+     "0.6": false
+    }
+   },
+   {
+    "airport": "제주",
+    "nat": "일본",
+    "lv": 0.65,
+    "li": 0.35,
+    "dv": 0.29,
+    "di": 0.06,
+    "pass": false,
+    "status": "참고값",
+    "n": 31,
+    "sensitivity": {
+     "0.4": false,
+     "0.5": false,
+     "0.6": false
+    }
+   },
+   {
+    "airport": "제주",
+    "nat": "중국",
+    "lv": 0.93,
+    "li": 0.82,
+    "dv": 0.72,
+    "di": 0.6,
+    "pass": true,
+    "status": "채택",
+    "n": 31,
+    "sensitivity": {
+     "0.4": true,
+     "0.5": true,
+     "0.6": true
+    }
+   },
+   {
+    "airport": "제주",
+    "nat": "베트남",
+    "lv": 0.49,
+    "li": 0.11,
+    "dv": 0.35,
+    "di": -0.08,
+    "pass": false,
+    "status": "참고값",
+    "n": 31,
+    "sensitivity": {
+     "0.4": false,
+     "0.5": false,
+     "0.6": false
+    }
+   }
+  ],
+  "log": [
+   {
+    "level": "info",
+    "code": "DAT-01",
+    "msg": "제외 대상 행 86건 (교포 43, 국제연합 43)"
+   },
+   {
+    "level": "info",
+    "code": "DAT-01",
+    "msg": "기간 합계 행 857건 제외(소계·전체)"
+   },
+   {
+    "level": "info",
+    "code": "DAT-02",
+    "msg": "국가 표기 통일 461행(터키→튀르키예 등), 통일 표기와 겹친 17행은 제외"
+   },
+   {
+    "level": "info",
+    "code": "BR-D1",
+    "msg": "경남: 창원 구 시군구 카드 미적재 → 보정 미적용"
+   }
+  ],
+  "status": "ok"
+ }
+}

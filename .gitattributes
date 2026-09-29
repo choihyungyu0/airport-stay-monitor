@@ -1,0 +1,4 @@
+# 원천 자료는 받은 바이트 그대로 둔다(출처 추적). 산출 JSON·코드는 LF로 고정해 --check 비교가 OS와 무관하게 한다.
+data/raw/** -text
+* text=auto eol=lf
+*.png binary

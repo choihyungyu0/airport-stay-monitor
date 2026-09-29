@@ -1,0 +1,31 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+.env
+.env.*
+!.env.example
+.vercel
+
+# Python
+__pycache__/
+.pytest_cache/
+*.pyc
+
+# 외래관광객조사 원자료 등 개인 신청 자료는 커밋 금지(IS-05)
+data/private/
+*.sav
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+
+# 로컬 도구 설정
+.claude/

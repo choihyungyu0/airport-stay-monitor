@@ -1,0 +1,4 @@
+# 데이터 빌드(scripts/build_data.py) — 산식은 표준 라이브러리만, 경계 변환에만 pyproj·pyshp
+pyproj>=3.6
+pyshp>=2.3
+pytest>=8

@@ -1,0 +1,14 @@
+{
+  "_doc": "산식 임계값과 비교 구간. 숫자를 바꾸면 build:data 결과와 tests/expected.json이 함께 달라진다.",
+  "nationalities": ["대만", "일본"],
+  "v2_nationalities": ["대만", "일본", "중국", "베트남"],
+  "halves": { "base": "2025H1", "target": "2026H1" },
+  "series_start": "202401",
+  "min_monthly_arrivals": 300,
+  "v2": { "start": "202401", "min_diff_corr": 0.5, "min_months": 24, "sensitivity": [0.4, 0.5, 0.6] },
+  "foreigner_definition_change": "2024-12-19",
+  "card_rebase_date": "2026-08-11",
+  "sgg": { "sido": "충북", "period": "2026H1", "airport_cd": "43114", "top_n": 8, "bins": [2000, 5000, 10000, 20000] },
+  "scenario": { "default_days": 0.5, "min_days": 0, "max_days": 2.0, "step": 0.5, "default_compare": "pus" },
+  "consistency": { "sido": ["부산", "대구", "제주"], "month": "202603", "tolerance": 0.001 }
+}

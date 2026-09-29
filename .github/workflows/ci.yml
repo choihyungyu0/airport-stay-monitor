@@ -1,0 +1,29 @@
+# OPS-01·04: 원천 → 산출 JSON이 커밋본과 같은지, 기대값 테스트, 빌드(검증 리포트 관문 포함)를 확인한다.
+# 하나라도 실패하면 main 배포를 멈춘다(Vercel 빌드도 npm run build의 검증 관문을 탄다).
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: pip install -r requirements.txt
+      - run: npm ci
+      - name: 산출 JSON 최신 여부
+        run: npm run check:data
+      - name: 지표 회귀 테스트(pytest) + 화면 테스트(Vitest)
+        run: npm test
+      - name: 빌드
+        run: npm run build

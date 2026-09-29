@@ -1,0 +1,36 @@
+{
+  "_doc": "지역·국가명 매핑표(DAT-01~03, DAT-05). 원천마다 다른 표기를 한 이름으로 통일하고, 시군구는 데이터랩 표기 → 행정표준코드(datalab_cd) → SGIS 코드(sgis_cd)를 잇는다.",
+  "country_alias": {
+    "터키": "튀르키예",
+    "러시아(연방)": "러시아",
+    "아랍에미리트연합": "아랍에미리트"
+  },
+  "entry_exclude": {
+    "_doc": "BR-D5 입국 소계 제외. suffix로 끝나는 대륙 소계(아시아주·미주·구주·대양주·아프리카주)와 names를 적재하지 않는다. summary_ym은 기간 합계 행.",
+    "suffix": "주",
+    "names": ["교포", "국제연합", "기타", "전체"],
+    "summary_ym": ["소계", "전체"]
+  },
+  "sido": ["서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종", "경기", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주"],
+  "sgg": [
+    { "region": "청주상당", "sido": "충북", "datalab_cd": "43111", "sgis_cd": "33041", "full": "청주시 상당구", "short": "상당구" },
+    { "region": "청주서원", "sido": "충북", "datalab_cd": "43112", "sgis_cd": "33042", "full": "청주시 서원구", "short": "서원구" },
+    { "region": "청주흥덕", "sido": "충북", "datalab_cd": "43113", "sgis_cd": "33043", "full": "청주시 흥덕구", "short": "흥덕구" },
+    { "region": "청주청원", "sido": "충북", "datalab_cd": "43114", "sgis_cd": "33044", "full": "청주시 청원구", "short": "청원구" },
+    { "region": "충주", "sido": "충북", "datalab_cd": "43130", "sgis_cd": "33020", "full": "충주시", "short": "충주시" },
+    { "region": "제천", "sido": "충북", "datalab_cd": "43150", "sgis_cd": "33030", "full": "제천시", "short": "제천시" },
+    { "region": "보은", "sido": "충북", "datalab_cd": "43720", "sgis_cd": "33520", "full": "보은군", "short": "보은군" },
+    { "region": "옥천", "sido": "충북", "datalab_cd": "43730", "sgis_cd": "33530", "full": "옥천군", "short": "옥천군" },
+    { "region": "영동", "sido": "충북", "datalab_cd": "43740", "sgis_cd": "33540", "full": "영동군", "short": "영동군" },
+    { "region": "증평", "sido": "충북", "datalab_cd": "43745", "sgis_cd": "33590", "full": "증평군", "short": "증평군" },
+    { "region": "진천", "sido": "충북", "datalab_cd": "43750", "sgis_cd": "33550", "full": "진천군", "short": "진천군" },
+    { "region": "괴산", "sido": "충북", "datalab_cd": "43760", "sgis_cd": "33560", "full": "괴산군", "short": "괴산군" },
+    { "region": "음성", "sido": "충북", "datalab_cd": "43770", "sgis_cd": "33570", "full": "음성군", "short": "음성군" },
+    { "region": "단양", "sido": "충북", "datalab_cd": "43800", "sgis_cd": "33580", "full": "단양군", "short": "단양군" },
+    { "region": "창원의창", "sido": "경남", "datalab_cd": "48121", "full": "창원시 의창구", "short": "의창구" },
+    { "region": "창원성산", "sido": "경남", "datalab_cd": "48123", "full": "창원시 성산구", "short": "성산구" },
+    { "region": "창원마산합포", "sido": "경남", "datalab_cd": "48125", "full": "창원시 마산합포구", "short": "마산합포구" },
+    { "region": "창원마산회원", "sido": "경남", "datalab_cd": "48127", "full": "창원시 마산회원구", "short": "마산회원구" },
+    { "region": "창원진해", "sido": "경남", "datalab_cd": "48129", "full": "창원시 진해구", "short": "진해구" }
+  ]
+}

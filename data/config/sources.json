@@ -1,0 +1,11 @@
+{
+  "_doc": "data/raw 원천 파일과 추출 정보. 월 1회 갱신 때 파일을 교체하고 추출일을 고친다(OPS-01). 데이터랩 공식 화면·다운로드로 받은 CSV만 둔다(BR-C1).",
+  "entry": "entry_airport_country_monthly_2023_2026.csv",
+  "datalab": ["datalab_foreign_all_sido_sgg.csv"],
+  "easypay": "datalab_foreign_easypay_by_country_industry_monthly.csv",
+  "sgg_table": "충북_시군구_외국인_2026H1.csv",
+  "boundary": "충북_시군구_경계_EPSG5179.geojson",
+  "datalab_extract": "2026.08",
+  "card_extracted_on": "2026-09-29",
+  "_card_extracted_on": "원천 CSV를 내려받은 날(파일 기준). 2026-08-11 재소급 이전 추출분이면 빌드 경고(BR-D3)."
+}

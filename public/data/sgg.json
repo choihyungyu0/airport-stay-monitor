@@ -1,0 +1,364 @@
+{
+ "sido": "충북",
+ "period": "2026H1",
+ "airport_cd": "43114",
+ "top_n": 8,
+ "bins": [
+  2000,
+  5000,
+  10000,
+  20000
+ ],
+ "items": [
+  {
+   "cd": "43111",
+   "sgis_cd": "33041",
+   "region": "청주상당",
+   "name": "상당구",
+   "full": "청주시 상당구",
+   "source": "raw",
+   "nat": {
+    "대만": {
+     "visit_mavg": 2620,
+     "card": 320565388,
+     "per_visit": 20393
+    },
+    "일본": {
+     "visit_mavg": 2014,
+     "card": 208822907,
+     "per_visit": 17282
+    }
+   },
+   "all": {
+    "visit_mavg": 17117,
+    "card": 1612894601,
+    "per_visit": 15704
+   }
+  },
+  {
+   "cd": "43112",
+   "sgis_cd": "33042",
+   "region": "청주서원",
+   "name": "서원구",
+   "full": "청주시 서원구",
+   "source": "raw",
+   "nat": {
+    "대만": {
+     "visit_mavg": 1179,
+     "card": 49832816,
+     "per_visit": 7046
+    },
+    "일본": {
+     "visit_mavg": 1256,
+     "card": 45807812,
+     "per_visit": 6081
+    }
+   },
+   "all": {
+    "visit_mavg": 25453,
+    "card": 1013320089,
+    "per_visit": 6635
+   }
+  },
+  {
+   "cd": "43113",
+   "sgis_cd": "33043",
+   "region": "청주흥덕",
+   "name": "흥덕구",
+   "full": "청주시 흥덕구",
+   "source": "raw",
+   "nat": {
+    "대만": {
+     "visit_mavg": 2823,
+     "card": 496614260,
+     "per_visit": 29321
+    },
+    "일본": {
+     "visit_mavg": 7248,
+     "card": 1073120058,
+     "per_visit": 24675
+    }
+   },
+   "all": {
+    "visit_mavg": 53617,
+    "card": 5772776471,
+    "per_visit": 17944
+   }
+  },
+  {
+   "cd": "43114",
+   "sgis_cd": "33044",
+   "region": "청주청원",
+   "name": "청원구",
+   "full": "청주시 청원구",
+   "source": "raw",
+   "nat": {
+    "대만": {
+     "visit_mavg": 8388,
+     "card": 99418707,
+     "per_visit": 1975
+    },
+    "일본": {
+     "visit_mavg": 8068,
+     "card": 413827235,
+     "per_visit": 8549
+    }
+   },
+   "all": {
+    "visit_mavg": 48818,
+    "card": 4772446948,
+    "per_visit": 16293
+   }
+  },
+  {
+   "cd": "43130",
+   "sgis_cd": "33020",
+   "region": "충주",
+   "name": "충주시",
+   "full": "충주시",
+   "source": "raw",
+   "nat": {
+    "대만": {
+     "visit_mavg": 238,
+     "card": 18659374,
+     "per_visit": 13039
+    },
+    "일본": {
+     "visit_mavg": 1704,
+     "card": 127150129,
+     "per_visit": 12436
+    }
+   },
+   "all": {
+    "visit_mavg": 32460,
+    "card": 2287867233,
+    "per_visit": 11747
+   }
+  },
+  {
+   "cd": "43150",
+   "sgis_cd": "33030",
+   "region": "제천",
+   "name": "제천시",
+   "full": "제천시",
+   "source": "raw",
+   "nat": {
+    "대만": {
+     "visit_mavg": 419,
+     "card": 2744330,
+     "per_visit": 1091
+    },
+    "일본": {
+     "visit_mavg": 520,
+     "card": 22335402,
+     "per_visit": 7154
+    }
+   },
+   "all": {
+    "visit_mavg": 14847,
+    "card": 1172235763,
+    "per_visit": 13159
+   }
+  },
+  {
+   "cd": "43720",
+   "sgis_cd": "33520",
+   "region": "보은",
+   "name": "보은군",
+   "full": "보은군",
+   "source": "table",
+   "nat": {
+    "대만": {
+     "visit_mavg": 312,
+     "card": 2000000,
+     "per_visit": 1040
+    },
+    "일본": {
+     "visit_mavg": 386,
+     "card": 7600000,
+     "per_visit": 3268
+    }
+   },
+   "all": {
+    "visit_mavg": 9772,
+    "card": 139400000,
+    "per_visit": 2378
+   }
+  },
+  {
+   "cd": "43730",
+   "sgis_cd": "33530",
+   "region": "옥천",
+   "name": "옥천군",
+   "full": "옥천군",
+   "source": "table",
+   "nat": {
+    "대만": {
+     "visit_mavg": 126,
+     "card": 1000000,
+     "per_visit": 1305
+    },
+    "일본": {
+     "visit_mavg": 394,
+     "card": 6900000,
+     "per_visit": 2915
+    }
+   },
+   "all": {
+    "visit_mavg": 9932,
+    "card": 137600000,
+    "per_visit": 2309
+   }
+  },
+  {
+   "cd": "43740",
+   "sgis_cd": "33540",
+   "region": "영동",
+   "name": "영동군",
+   "full": "영동군",
+   "source": "table",
+   "nat": {
+    "대만": {
+     "visit_mavg": 102,
+     "card": 200000,
+     "per_visit": 371
+    },
+    "일본": {
+     "visit_mavg": 289,
+     "card": 9700000,
+     "per_visit": 5618
+    }
+   },
+   "all": {
+    "visit_mavg": 9649,
+    "card": 132100000,
+    "per_visit": 2282
+   }
+  },
+  {
+   "cd": "43745",
+   "sgis_cd": "33590",
+   "region": "증평",
+   "name": "증평군",
+   "full": "증평군",
+   "source": "table",
+   "nat": {
+    "대만": {
+     "visit_mavg": 82,
+     "card": 600000,
+     "per_visit": 1195
+    },
+    "일본": {
+     "visit_mavg": 294,
+     "card": 4500000,
+     "per_visit": 2534
+    }
+   },
+   "all": {
+    "visit_mavg": 4849,
+    "card": 156100000,
+    "per_visit": 5365
+   }
+  },
+  {
+   "cd": "43750",
+   "sgis_cd": "33550",
+   "region": "진천",
+   "name": "진천군",
+   "full": "진천군",
+   "source": "table",
+   "nat": {
+    "대만": {
+     "visit_mavg": 377,
+     "card": 1500000,
+     "per_visit": 675
+    },
+    "일본": {
+     "visit_mavg": 854,
+     "card": 40800000,
+     "per_visit": 7965
+    }
+   },
+   "all": {
+    "visit_mavg": 29520,
+    "card": 591900000,
+    "per_visit": 3342
+   }
+  },
+  {
+   "cd": "43760",
+   "sgis_cd": "33560",
+   "region": "괴산",
+   "name": "괴산군",
+   "full": "괴산군",
+   "source": "table",
+   "nat": {
+    "대만": {
+     "visit_mavg": 83,
+     "card": 900000,
+     "per_visit": 1765
+    },
+    "일본": {
+     "visit_mavg": 462,
+     "card": 5300000,
+     "per_visit": 1929
+    }
+   },
+   "all": {
+    "visit_mavg": 20702,
+    "card": 163900000,
+    "per_visit": 1320
+   }
+  },
+  {
+   "cd": "43770",
+   "sgis_cd": "33570",
+   "region": "음성",
+   "name": "음성군",
+   "full": "음성군",
+   "source": "table",
+   "nat": {
+    "대만": {
+     "visit_mavg": 254,
+     "card": 7400000,
+     "per_visit": 4828
+    },
+    "일본": {
+     "visit_mavg": 1108,
+     "card": 65300000,
+     "per_visit": 9823
+    }
+   },
+   "all": {
+    "visit_mavg": 47866,
+    "card": 894600000,
+    "per_visit": 3115
+   }
+  },
+  {
+   "cd": "43800",
+   "sgis_cd": "33580",
+   "region": "단양",
+   "name": "단양군",
+   "full": "단양군",
+   "source": "raw",
+   "nat": {
+    "대만": {
+     "visit_mavg": 1183,
+     "card": 17731391,
+     "per_visit": 2498
+    },
+    "일본": {
+     "visit_mavg": 269,
+     "card": 9819335,
+     "per_visit": 6076
+    }
+   },
+   "all": {
+    "visit_mavg": 7049,
+    "card": 262686438,
+    "per_visit": 6211
+   }
+  }
+ ]
+}
