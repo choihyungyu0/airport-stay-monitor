@@ -36,12 +36,24 @@ export interface NatBlock {
   }
 }
 
+export interface Lodging {
+  total: number
+  hotel: number
+}
+
 export interface Airport {
   id: string
   name: string
   region: string
   color: string
   role: 'target' | 'baseline' | 'compare'
+  /** 지도 표시용 점(소수 둘째 자리) */
+  lat?: number
+  lng?: number
+  /** 공군과 활주로를 같이 쓰는 공항 — 확대 제한 대상 */
+  military_shared?: boolean
+  /** 반경별 숙박 공급: { "5": {...}, "10": {...} } */
+  lodging?: Record<string, Lodging>
   nat: Record<string, NatBlock>
 }
 
@@ -86,6 +98,7 @@ export interface Indicators {
   airports: Airport[]
   decomposition: Decomposition
   scenario: ScenarioConfig
+  supply?: { source: string; note: string; radii_km: number[] }
   industry: { region: string; periods: Record<string, Record<string, number>> }
 }
 
@@ -106,6 +119,19 @@ export interface SggItem {
   all: SggMetric
 }
 
+export interface ContentPin {
+  name: string
+  region: string
+  cd: string
+  representative: boolean
+  place: string
+  address: string
+  lat: number
+  lng: number
+  looked_up_on: string
+  verified_on: string | null
+}
+
 export interface SggData {
   sido: string
   period: string
@@ -113,6 +139,7 @@ export interface SggData {
   top_n: number
   bins: number[]
   items: SggItem[]
+  pins?: { source: string; items: ContentPin[] }
 }
 
 export type CheckStatus = 'pass' | 'warn' | 'fail' | 'skip'
@@ -177,5 +204,10 @@ export interface Boundary {
   features: BoundaryFeature[]
 }
 
+export interface SidoBoundary {
+  type: 'FeatureCollection'
+  features: { type: 'Feature'; properties: { sgis_cd: string; region: string }; geometry: { type: 'MultiPolygon'; coordinates: unknown } }[]
+}
+
 export type Metric = 'ratio' | 'card' | 'arr'
-export type Basemap = 'none' | 'gray' | 'satellite'
+export type Basemap = 'satellite' | 'gray' | 'none'

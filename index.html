@@ -5,10 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="지방공항으로 들어온 외래객이 그 권역에 며칠 머물고 얼마를 쓰는지, 한국관광 데이터랩 공개 데이터로 매달 국적별·시군구별로 산출합니다." />
     <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#0a0e14" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap" />
+    <link rel="preconnect" href="https://api.vworld.kr" />
+    <!-- 본문·표 Pretendard Variable(dynamic subset)은 src/lib/fonts.ts가 위성 타일 뒤에 붙인다. 숫자 전용 JetBrains Mono는 app.css @font-face, 제목 Hahmlet은 화면 글자만 받아 온다 -->
+    <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" /></noscript>
     <title>공항 체류전환 모니터</title>
   </head>
   <body>

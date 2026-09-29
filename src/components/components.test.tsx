@@ -9,7 +9,8 @@ import { EffectView } from '../views/EffectView'
 import { Board } from './Board'
 import { Decomposition } from './Decomposition'
 import { KpiTiles } from './Kpi'
-import { asofText, tabFromHash } from './Shell'
+import { asofText, canonicalHash, tabFromHash } from './Shell'
+import { FidsPanel, SggPanel } from './StagePanels'
 import { Validations } from './Validations'
 
 const read = <T,>(name: string): T => JSON.parse(readFileSync(resolve(process.cwd(), 'public/data', name), 'utf8')) as T
@@ -30,11 +31,11 @@ describe('UI-01 공항별 비교(출발 안내판)', () => {
     expect(q.getByText('36,790')).toBeTruthy()
     expect(q.getByText('2.55')).toBeTruthy()
     expect(q.getByText('+105%')).toBeTruthy()
-    expect(q.getByText('연동 검정 통과')).toBeTruthy()
+    expect(q.getByText('통과')).toBeTruthy()
   })
   it('검정 칩에 차분 상관(인천)을 담는다', () => {
     render(<Board data={data} nat="대만" />)
-    const chip = within(screen.getByRole('row', { name: '청주공항 대만' })).getByText('연동 검정 통과').closest('[data-ui="CHP-01"]')!
+    const chip = within(screen.getByRole('row', { name: '청주공항 대만' })).getByText('통과').closest('[data-ui="CHP-01"]')!
     expect(chip.getAttribute('title')).toContain('차분 상관 0.83(인천 0.49)')
   })
   it('제주 대만은 참고값(ST-05)', () => {
@@ -70,9 +71,9 @@ describe('현황 핵심 지표', () => {
 })
 
 describe('UI-07 요인분해', () => {
-  it('74,701 → 66,903, 일본 −10,440이 가장 큰 몫', () => {
+  it('74,702 → 66,903, 일본 −10,440이 가장 큰 몫', () => {
     const { container } = render(<Decomposition data={data} />)
-    expect(screen.getByText(/74,701원 → .* 66,903원/)).toBeTruthy()
+    expect(screen.getByText(/74,702원 → .* 66,903원/)).toBeTruthy()
     const lead = container.querySelector('.brg.lead')!
     expect(lead.textContent).toContain('일본 1인당 소비 변화')
     expect(lead.textContent).toContain('−10,440원')
@@ -87,7 +88,9 @@ describe('UI-08 효과 계산', () => {
     fireEvent.change(screen.getByLabelText('사업비(선택)'), { target: { value: '1' } })
     rerender(<EffectView data={data} meta={meta} nat="대만" input={input} onInput={(n) => (input = n)} onToast={() => {}} />)
     expect(screen.getByText('2.0~11.2배')).toBeTruthy()
-    expect(screen.getByText(/사업비 1억 원 대비 추가 소비 2\.0~11\.2배/)).toBeTruthy()
+    expect(screen.getByText(/추가 카드소비 ÷ 사업비 1억 원 = 2\.0~11\.2배\(단순 배수, 경제적 파급효과 아님\)/)).toBeTruthy()
+    expect(screen.getByText('추가 카드소비 ÷ 사업비 (단순 배수, 경제적 파급효과 아님)')).toBeTruthy()
+    expect(screen.getByRole('heading', { name: /체류 0\.5일 증가 시/ })).toBeTruthy()
   })
 })
 
@@ -97,10 +100,15 @@ describe('TXT-01 · 탭 주소', () => {
     expect(asofText(meta)).toContain('입국 2026.07까지 · 데이터랩 2026.08 추출')
   })
   it('명세서 앵커도 해당 탭으로 연다', () => {
-    expect(tabFromHash('#map')).toBe('sgg')
+    expect(tabFromHash('#map')).toBe('map')
+    expect(tabFromHash('#overview')).toBe('map')
+    expect(tabFromHash('#sgg')).toBe('map')
     expect(tabFromHash('#method')).toBe('data')
     expect(tabFromHash('#report')).toBe('report')
-    expect(tabFromHash('')).toBe('overview')
+    expect(tabFromHash('')).toBe('map')
+    expect(canonicalHash('#overview')).toBe('#map')
+    expect(canonicalHash('#sgg')).toBe('#map')
+    expect(canonicalHash('#effect')).toBeNull()
   })
 })
 
@@ -108,13 +116,33 @@ describe('PNL-02 · ST-09', () => {
   it('검증 6종을 모두 표시', () => {
     render(<Validations meta={meta} />)
     for (const v of meta.report.validations) expect(screen.getByText(`${v.id} ${v.title}`)).toBeTruthy()
-    expect(screen.getByText(/데이터 점검 8항목 · 모두 통과/)).toBeTruthy()
+    expect(screen.getByText(`데이터 점검 ${meta.report.checks.length}항목 · 모두 통과`)).toBeTruthy()
     expect(screen.queryByText(/시도-시군구 불일치/)).toBeNull()
   })
   it('불일치가 있으면 경고 배지', () => {
     const bad: Meta = { ...meta, report: { ...meta.report, consistency: { ...meta.report.consistency, mismatch: 2 } } }
     render(<Validations meta={bad} />)
     expect(screen.getByText(/시도-시군구 불일치 2건/)).toBeTruthy()
+  })
+})
+
+describe('지도 패널', () => {
+  const sgg = read<import('../lib/types').SggData>('sgg.json')
+  it('1장면: 제목·안내판 4행·비교 한 줄', () => {
+    render(<FidsPanel data={data} meta={meta} nat="대만" selected={null} onSelect={() => {}} month={null} onMonth={() => {}} onScene={() => {}} />)
+    expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('입국은 2.1배로, 1인당 소비는 그대로.')
+    expect(screen.getAllByRole('row').filter((r) => r.getAttribute('aria-label'))).toHaveLength(4)
+    expect(screen.getByText('청주 입국 대만인 1인당 충북 카드소비는 김해→부산의 8.4%, 체류는 김해의 47%')).toBeTruthy()
+    expect(screen.getByRole('button', { name: '▶ 월별 재생' })).toBeTruthy()
+  })
+  it('2장면: 값 제목·공항 반경 숙박·시군구 표', () => {
+    render(<SggPanel data={data} sgg={sgg} meta={meta} nat="대만" active={null} onHover={() => {}} onPin={() => {}} onBack={() => {}} onToast={() => {}} boundaryError={false} />)
+    expect(screen.getByRole('heading', { level: 2 }).textContent).toBe('방문 최다 청원구(공항) 8,388명/월 · 방문 1회당 소비 최대 흥덕구 29,321원(청원구의 14.8배)')
+    expect(screen.getByText('청주공항 반경 5km 숙박업소 9곳(호텔 0) · 10km 258곳(호텔 17)')).toBeTruthy()
+    const first = screen.getAllByRole('row')[1]
+    expect(first.textContent).toContain('청주시 청원구 (공항)')
+    expect(first.textContent).toContain('8,388')
+    expect(first.textContent).toContain('1,975원')
   })
 })
 

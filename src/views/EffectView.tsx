@@ -105,7 +105,7 @@ export function EffectView({ data, meta, nat, input, onInput, onToast }: Props) 
               />
               <span>억 원</span>
             </div>
-            <p className="hint">넣으면 사업비 대비 추가 소비 배수를 함께 계산합니다.</p>
+            <p className="hint">넣으면 추가 카드소비를 사업비로 나눈 단순 배수를 함께 보입니다(경제적 파급효과 아님).</p>
           </div>
         </form>
 
@@ -138,7 +138,7 @@ export function EffectView({ data, meta, nat, input, onInput, onToast }: Props) 
               </div>
               {budget && (
                 <div>
-                  <dt>사업비 대비</dt>
+                  <dt>추가 카드소비 ÷ 사업비 (단순 배수, 경제적 파급효과 아님)</dt>
                   <dd>
                     {(r.low / budget).toFixed(1)}~{(r.high / budget).toFixed(1)}배
                   </dd>

@@ -5,6 +5,7 @@
   "easypay": "datalab_foreign_easypay_by_country_industry_monthly.csv",
   "sgg_table": "충북_시군구_외국인_2026H1.csv",
   "boundary": "충북_시군구_경계_EPSG5179.geojson",
+  "sido_boundary": "시도_경계_EPSG5179.geojson",
   "datalab_extract": "2026.08",
   "card_extracted_on": "2026-09-29",
   "_card_extracted_on": "원천 CSV를 내려받은 날(파일 기준). 2026-08-11 재소급 이전 추출분이면 빌드 경고(BR-D3)."

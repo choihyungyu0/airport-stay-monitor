@@ -15,9 +15,9 @@
     { "airport": "cju", "nat": "대만", "dv": 0.30, "di": 0.41, "pass": false }
   ],
   "kitagawa": {
-    "R0": 74701, "R1": 66903, "total": -7798, "pct": -10.4, "comp": 2348,
+    "R0": 74702, "R1": 66903, "total": -7798, "pct": -10.4, "comp": 2348,
     "rate": { "대만": 294, "일본": -10440 },
-    "tolerance": 1
+    "tolerance": 0
   },
   "card_correction": { "region": "충북", "half": "2026H1", "before_eok": 59.4, "after_eok": 191.1, "nat": "대만", "nat_won": 1019084278 },
   "visits": { "region": "충북", "nat": "대만", "month": "202603", "value": 11157 },

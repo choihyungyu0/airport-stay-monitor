@@ -4,7 +4,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 
 const dir = fileURLToPath(new URL('../public/data/', import.meta.url))
-const files = ['indicators.json', 'sgg.json', 'boundary_43.geojson', 'meta.json']
+const files = ['indicators.json', 'sgg.json', 'boundary_43.geojson', 'boundary_sido.geojson', 'meta.json']
 const problems = []
 
 for (const f of files) {

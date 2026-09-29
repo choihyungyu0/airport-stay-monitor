@@ -1,0 +1,78 @@
+{
+  "_doc": "공사 타이베이지사 2026 대만 「중부관광의해」 충북 선정 콘텐츠(2026 요즘데세 2차 자료집). 좌표는 V-World 장소 검색으로 1회 조회(scripts/geocode_pins.py). verified_on은 사람이 지도에서 확인한 날짜 — 비어 있으면 화면에 「좌표 확인 전」 표시.",
+  "source": "한국관광공사 타이베이지사 2026 대만 「중부관광의해」 충북 선정 콘텐츠(요즘데세 2차 자료집)",
+  "pins": [
+    {
+      "name": "육거리시장",
+      "region": "청주상당",
+      "representative": false,
+      "place": "육거리종합시장",
+      "address": "충청북도 청주시 상당구 남문로1가 남사로112번길 53-7",
+      "lat": 36.62869,
+      "lng": 127.48931,
+      "query": "육거리종합시장",
+      "looked_up_on": "2026-09-30",
+      "verified_on": null
+    },
+    {
+      "name": "충주중앙탑공원",
+      "region": "충주",
+      "representative": false,
+      "place": "중앙탑공원",
+      "address": "충청북도 충주시 중앙탑면 탑정안길 6",
+      "lat": 37.01787,
+      "lng": 127.86621,
+      "query": "중앙탑공원",
+      "looked_up_on": "2026-09-30",
+      "verified_on": null
+    },
+    {
+      "name": "만천하스카이워크",
+      "region": "단양",
+      "representative": false,
+      "place": "만천하스카이워크",
+      "address": "충청북도 단양군 적성면 옷바위길 10",
+      "lat": 36.97773,
+      "lng": 128.33728,
+      "query": "만천하스카이워크",
+      "looked_up_on": "2026-09-30",
+      "verified_on": null
+    },
+    {
+      "name": "단양 체험콘텐츠",
+      "region": "단양",
+      "representative": true,
+      "place": "단양패러글라이딩",
+      "address": "충청북도 단양군 가곡면 두산길 196-54",
+      "lat": 36.99638,
+      "lng": 128.39668,
+      "query": "단양 패러글라이딩",
+      "looked_up_on": "2026-09-30",
+      "verified_on": null
+    },
+    {
+      "name": "제천 약채락 맛기행",
+      "region": "제천",
+      "representative": true,
+      "place": "제천약채락협동조합",
+      "address": "충청북도 제천시 숭문로 88-9",
+      "lat": 37.14092,
+      "lng": 128.20869,
+      "query": "약채락",
+      "looked_up_on": "2026-09-30",
+      "verified_on": null
+    },
+    {
+      "name": "음성품바축제",
+      "region": "음성",
+      "representative": true,
+      "place": "설성공원",
+      "address": "충청북도 음성군 음성읍 설성공원길 28",
+      "lat": 36.93279,
+      "lng": 127.69102,
+      "query": "설성공원",
+      "looked_up_on": "2026-09-30",
+      "verified_on": null
+    }
+  ]
+}

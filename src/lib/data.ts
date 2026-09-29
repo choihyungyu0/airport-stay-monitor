@@ -1,4 +1,4 @@
-import type { Boundary, Indicators, Meta, SggData } from './types'
+import type { Boundary, Indicators, Meta, SggData, SidoBoundary } from './types'
 
 // 산출 JSON 로딩. 지표·시군구는 필수(실패 시 ST-03), 메타와 경계는 따로 실패를 처리한다(ST-10, ST-07).
 
@@ -27,3 +27,5 @@ export async function loadCore(): Promise<CoreData> {
 }
 
 export const loadBoundary = () => getJson<Boundary>('boundary_43.geojson')
+
+export const loadSido = () => getJson<SidoBoundary>('boundary_sido.geojson')

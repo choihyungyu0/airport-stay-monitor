@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { copyText, downloadText } from '../lib/clipboard'
-import { downloadHwpx } from '../lib/hwpx'
 import type { ReportDoc } from '../lib/report'
 
 interface Props {
@@ -30,6 +29,7 @@ export function CopyBox({ text, filename, onToast, label = '문안', doc }: Prop
               onClick={async () => {
                 setBusy(true)
                 try {
+                  const { downloadHwpx } = await import('../lib/hwpx')
                   await downloadHwpx(doc, `${filename}.hwpx`)
                   onToast(`${filename}.hwpx를 저장했습니다. 한글에서 바로 열립니다.`)
                 } catch (e) {

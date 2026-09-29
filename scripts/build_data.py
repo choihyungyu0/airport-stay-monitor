@@ -23,11 +23,11 @@ ROOT = Path(__file__).resolve().parent.parent
 RAW = ROOT / "data" / "raw"
 CONFIG = ROOT / "data" / "config"
 OUT = ROOT / "public" / "data"
-OUTPUT_FILES = ("indicators.json", "sgg.json", "boundary_43.geojson", "meta.json")
+OUTPUT_FILES = ("indicators.json", "sgg.json", "boundary_43.geojson", "boundary_sido.geojson", "meta.json")
 
 
 def load_config(config_dir: Path = CONFIG) -> dict:
-    names = ("airports", "region_map", "gu_cities", "settings", "sources", "reference_values")
+    names = ("airports", "region_map", "gu_cities", "settings", "sources", "reference_values", "airport_supply", "tw_pins")
     return {n: json.loads((config_dir / f"{n}.json").read_text(encoding="utf-8")) for n in names}
 
 
@@ -127,8 +127,12 @@ def build_indicators(m: Model) -> dict:
     min_arr = st["min_monthly_arrivals"]
     airports = []
     for a in m.airports:
-        entry = {k: a[k] for k in ("id", "name", "region", "color") if k in a}
+        entry = {k: a[k] for k in ("id", "name", "region", "color", "lat", "lng") if k in a}
         entry["role"] = a.get("role", "compare")
+        entry["military_shared"] = bool(a.get("military_shared"))
+        sup = m.cfg["airport_supply"]["lodging"].get(a["id"])
+        if sup:
+            entry["lodging"] = sup
         entry["nat"] = {}
         for nat in st["nationalities"]:
             if not m.available(a, nat):
@@ -167,14 +171,13 @@ def build_indicators(m: Model) -> dict:
 
     dec = m.decomposition()
     if not dec["skipped"]:
-        # 분해 값은 참고 구현(compute_indicators.py)의 %d 표기처럼 소수점 이하를 버린다(74,701 → 66,903).
-        # 국적별 1인당(r0·r1)은 카드 ①과 같은 값이라 ①처럼 반올림한다.
+        # 표시값은 모두 반올림한다(대만 293.55 → +294). 버림이면 구성·국적별 효과의 합이 가중 1인당 변화와 1원 어긋난다.
         dec = {
             "skipped": False, "airport": dec["airport"], "region": dec["region"], "nats": dec["nats"],
             "base": dec["base"], "target": dec["target"],
-            "R0": int(dec["R0"]), "R1": int(dec["R1"]), "total": int(dec["total"]), "pct": rnd(dec["pct"], 1),
-            "comp": int(dec["comp"]),
-            "rate": {c: int(v) for c, v in dec["rate"].items()},
+            "R0": rint(dec["R0"]), "R1": rint(dec["R1"]), "total": rint(dec["total"]), "pct": rnd(dec["pct"], 1),
+            "comp": rint(dec["comp"]),
+            "rate": {c: rint(v) for c, v in dec["rate"].items()},
             "r0": {c: rint(v) for c, v in dec["r0"].items()},
             "r1": {c: rint(v) for c, v in dec["r1"].items()},
             "s0": {c: rnd(v, 4) for c, v in dec["s0"].items()},
@@ -195,6 +198,7 @@ def build_indicators(m: Model) -> dict:
         "airports": airports,
         "decomposition": dec,
         "scenario": st["scenario"],
+        "supply": {k: m.cfg["airport_supply"][k] for k in ("source", "note", "radii_km")},
         "industry": {"region": m.ap[tid]["region"],
                      "periods": {p: {k: rint(v) for k, v in c.items()} for p, c in industry.items()}},
     }
@@ -213,7 +217,16 @@ def build_sgg(m: Model) -> dict:
         items.append({k: s[k] for k in ("cd", "sgis_cd", "region", "name", "full", "source")}
                      | {"nat": {n: clean(v) for n, v in s["nat"].items()}, "all": clean(s["all"])})
     return {"sido": st["sido"], "period": st["period"], "airport_cd": st["airport_cd"],
-            "top_n": st["top_n"], "bins": st["bins"], "items": items}
+            "top_n": st["top_n"], "bins": st["bins"], "items": items, "pins": build_pins(m)}
+
+
+def build_pins(m: Model) -> dict:
+    """대만 타깃 콘텐츠 지점(tw_pins.json). 시군구는 데이터랩 표기 → 행정표준 코드로 잇는다."""
+    cfg = m.cfg["tw_pins"]
+    cd = {s["region"]: s["datalab_cd"] for s in m.cfg["region_map"]["sgg"]}
+    keys = ("name", "region", "representative", "place", "address", "lat", "lng", "looked_up_on", "verified_on")
+    pins = [{k: p[k] for k in keys} | {"cd": cd[p["region"]]} for p in cfg["pins"]]
+    return {"source": cfg["source"], "items": pins}
 
 
 # ── DAT-05 경계 ──────────────────────────────────────────────────────
@@ -313,6 +326,39 @@ def build_boundary(m: Model, tol_m: float = 30.0) -> dict:
         raise ind.DataError("코드 대응 실패: 경계 없음 " + ", ".join(missing))
     feats.sort(key=lambda f: f["properties"]["cd"])
     return {"type": "FeatureCollection", "features": feats}
+
+
+def build_boundary_sido(m: Model) -> dict:
+    """공항 권역 시도 윤곽(지도 탭 행 클릭 강조). scripts/extract_sido.py가 뽑아 둔 EPSG:5179 → WGS84."""
+    from pyproj import Transformer
+
+    tf = Transformer.from_crs(5179, 4326, always_xy=True)
+    feats = []
+    for props, geom in read_boundary(m.raw_dir / m.cfg["sources"]["sido_boundary"]):
+        polys = geom["coordinates"] if geom["type"] == "MultiPolygon" else [geom["coordinates"]]
+        out = [[[[round(x, 4), round(y, 4)] for x, y in (tf.transform(px, py) for px, py in ring)] for ring in poly]
+               for poly in polys]
+        feats.append({"type": "Feature", "properties": {"sgis_cd": props["sgis_cd"], "region": props["name"]},
+                      "geometry": {"type": "MultiPolygon", "coordinates": out}})
+    have = {f["properties"]["region"] for f in feats}
+    missing = sorted({a["region"] for a in m.airports} - have)
+    if missing:
+        m.log.add("warn", "DAT-05", f"시도 경계 없음 → 권역 강조 생략: {', '.join(missing)}")
+    return {"type": "FeatureCollection", "features": feats}
+
+
+def _in_ring(lng: float, lat: float, ring: list) -> bool:
+    hit = False
+    for (x0, y0), (x1, y1) in zip(ring, ring[1:]):
+        if (y0 > lat) != (y1 > lat) and lng < (x1 - x0) * (lat - y0) / (y1 - y0) + x0:
+            hit = not hit
+    return hit
+
+
+def point_in_polygon(lng: float, lat: float, geom: dict) -> bool:
+    """(구멍을 뺀) 다각형 안에 점이 있는지. 좌표는 [경도, 위도]."""
+    polys = geom["coordinates"] if geom["type"] == "MultiPolygon" else [geom["coordinates"]]
+    return any(_in_ring(lng, lat, poly[0]) and not any(_in_ring(lng, lat, h) for h in poly[1:]) for poly in polys)
 
 
 # ── DAT-06 검증 리포트 ────────────────────────────────────────────────
@@ -459,6 +505,17 @@ def build_report(m: Model, boundary: dict | None) -> dict:
     checks.append(check("C8", "지역·국가명 매핑", "warn" if unk else "pass",
                         " / ".join(unk + alias) if (unk or alias) else "매핑표 밖 표기 없음"))
 
+    # C9 콘텐츠 지점: 좌표가 적힌 시군구 경계 안에 있는지(자동) + 사람 확인 여부
+    if boundary is not None:
+        polys = {f["properties"]["cd"]: f["geometry"] for f in boundary["features"]}
+        cd = {s["region"]: s["datalab_cd"] for s in cfg["region_map"]["sgg"]}
+        pins = cfg["tw_pins"]["pins"]
+        outside = [p["name"] for p in pins if not point_in_polygon(p["lng"], p["lat"], polys[cd[p["region"]]])]
+        unverified = [p["name"] for p in pins if not p.get("verified_on")]
+        detail = f"{len(pins)}곳 모두 소속 시군구 경계 안" if not outside else f"시군구 밖: {', '.join(outside)}"
+        detail += f" · 사람 확인 전 {len(unverified)}곳" if unverified else " · 사람 확인 완료"
+        checks.append(check("C9", "콘텐츠 지점 좌표", "warn" if outside else "pass", detail))
+
     return {"checks": checks, "consistency": {"mismatch": mism, "skipped": skipped, "checked": len(items) - skipped},
             "validations": build_validations(m), "v2_table": build_v2_table(m), "log": m.log.items,
             "status": "fail" if any(c["status"] == "fail" for c in checks) else "ok"}
@@ -577,11 +634,13 @@ def build_all(cfg: dict | None = None, raw_dir: Path = RAW) -> dict[str, str]:
     cfg = cfg or load_config()
     m = Model(cfg, raw_dir)
     boundary = build_boundary(m)
+    sido = build_boundary_sido(m)
     report = build_report(m, boundary)
     return {
         "indicators.json": dumps(build_indicators(m), True),
         "sgg.json": dumps(build_sgg(m), False),
         "boundary_43.geojson": dumps(boundary, True),
+        "boundary_sido.geojson": dumps(sido, True),
         "meta.json": dumps(build_meta(m, report), False),
     }
 

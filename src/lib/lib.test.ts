@@ -5,7 +5,7 @@ import { buildCsv, csvCell } from './csv'
 import { fmt, fmtEok, fmtHalf, fmtYm, signed, signedPct } from './format'
 import { clampDays, computeScenario } from './scenario'
 import { axisTop, buildSeries, dividerIndex, niceStep } from './series'
-import { daysPhrase, decompCaption, decompRows, decompTitle, mapStory, times } from './story'
+import { compareLine, daysPhrase, decompCaption, decompRows, decompTitle, mapStory, times } from './story'
 import { effectReport, halfReport, monthlyReport, summaryLine } from './report'
 import type { Indicators, Meta, SggData } from './types'
 
@@ -85,23 +85,30 @@ describe('UI-11 CSV', () => {
 })
 
 describe('섹션 결론 문장(story)', () => {
-  it('지도: 방문은 청원구(공항)에, 지갑은 흥덕구에서 — 15배', () => {
+  it('지도: 방문 최다 청원구(공항) · 방문 1회당 소비 최대 흥덕구 — 14.8배', () => {
     const s = mapStory(sgg, '대만')!
     expect(s.visitTop.name).toBe('청원구')
     expect(s.spendTop.name).toBe('흥덕구')
     expect(times(s.ratio!)).toBe('14.8배')
-    expect(s.title).toBe('방문은 청원구(공항)에 몰리고, 지갑은 흥덕구에서 열립니다.')
+    expect(s.title).toBe('방문 최다 청원구(공항) 8,388명/월 · 방문 1회당 소비 최대 흥덕구 29,321원(청원구의 14.8배)')
   })
   it('요인분해: 가장 큰 몫은 일본 1인당 감소', () => {
     const d = data.decomposition
     if (d.skipped) throw new Error('분해 생략됨')
     expect(decompTitle(d)).toBe('일본 입국자의 1인당 소비 감소(−10,440원)입니다.')
-    expect(decompCaption(d)).toContain('74,701원 → 66,903원(−7,798원, −10.4%)')
+    expect(decompCaption(d)).toContain('74,702원 → 66,903원(−7,798원, −10.4%)')
+    // 표시값을 모두 반올림하면 구성 + 국적별 효과의 합이 가중 1인당 변화와 원 단위로 맞는다
+    expect(d.comp + Object.values(d.rate).reduce((a, b) => a + b, 0)).toBe(d.total)
+    expect(d.rate['대만']).toBe(294)
     expect(decompRows(d).filter((r) => r.lead).map((r) => r.key)).toEqual(['일본'])
   })
   it('시나리오 문구', () => {
-    expect(daysPhrase(0.5)).toBe('반나절 더 머물면')
-    expect(daysPhrase(2)).toBe('이틀 더 머물면')
+    expect(daysPhrase(0.5)).toBe('체류 0.5일 증가 시')
+    expect(daysPhrase(2)).toBe('체류 2.0일 증가 시')
+  })
+  it('첫 화면 비교 한 줄', () => {
+    expect(compareLine(data, '대만')).toBe('청주 입국 대만인 1인당 충북 카드소비는 김해→부산의 8.4%, 체류는 김해의 47%')
+    expect(compareLine(data, '일본')).toBe('청주 입국 일본인 1인당 충북 카드소비는 김해→부산의 21%, 체류는 김해의 142%')
   })
 })
 
@@ -123,7 +130,7 @@ describe('보고 문안(report)', () => {
     const t = halfReport(data, sgg, meta, '대만', computeScenario(data, '대만', 0.5, 'pus'))
     expect(t).toContain('김해공항 입국자의 부산 소비 440,089원(12배), 대구공항 입국자의 대구 소비 129,664원(3.5배)')
     expect(t).toContain('방문은 청원구(공항 소재, 월평균 8,388명)에 몰리나 방문 1회당 소비는 1,975원이고, 흥덕구는 29,321원으로 14.8배')
-    expect(t).toContain('74,701원 → 66,903원(−7,798원) 중 일본 입국자의 1인당 소비 감소가 −10,440원')
+    expect(t).toContain('74,702원 → 66,903원(−7,798원) 중 일본 입국자의 1인당 소비 감소가 −10,440원')
     expect(t).toContain('추가 카드소비 2.0억~11.2억 원')
     expect(t).not.toContain('제주공항') // 참고값 공항은 비교에서 뺀다
   })
@@ -131,6 +138,6 @@ describe('보고 문안(report)', () => {
     const r = computeScenario(data, '대만', 1, 'pus', 60000)!
     const t = effectReport(data, '대만', r, 'pus', true, 2)
     expect(t).toContain('청주공항 대만 입국 60,000명(입력값) × 1.0일 × 14,427~81,048원 = 8.7억~48.6억 원')
-    expect(t).toMatch(/사업비 2억 원 대비 추가 소비 4\.3~24\.3배/)
+    expect(t).toContain('추가 카드소비 ÷ 사업비 2억 원 = 4.3~24.3배(단순 배수, 경제적 파급효과 아님)')
   })
 })

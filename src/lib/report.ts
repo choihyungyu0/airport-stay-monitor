@@ -247,7 +247,7 @@ export function effectDoc(
     `   - 하한: ${t.name}공항 입국자의 현재 ${t.region} 인·일당 카드소비 ${fmt(r.perDayTarget)}원(${fmtHalf(data.halves.target)})`,
   ]
   if (c) lines.push(`   - 상한: ${c.name}공항 입국자의 ${c.region} 인·일당 카드소비 ${fmt(r.perDayCompare)}원(같은 기간${r.compareIsReference ? ', 참고값' : ''})`)
-  if (budget) lines.push(` ○ 사업비 ${budgetEok!.toLocaleString('ko-KR')}억 원 대비 추가 소비 ${(r.low / budget).toFixed(1)}~${(r.high / budget).toFixed(1)}배`)
+  if (budget) lines.push(` ○ 추가 카드소비 ÷ 사업비 ${budgetEok!.toLocaleString('ko-KR')}억 원 = ${(r.low / budget).toFixed(1)}~${(r.high / budget).toFixed(1)}배(단순 배수, 경제적 파급효과 아님)`)
   const row = (label: string, basis: string, perDay: number) => {
     const amt = r.arrivals * r.days * perDay
     const mil = (amt / 1e6).toLocaleString('ko-KR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
@@ -260,7 +260,7 @@ export function effectDoc(
     notes: ['※ 인·일당 카드소비 = 입국 1인당 권역 카드소비 ÷ 입국 1인당 권역 체류 인·일(한국관광 데이터랩)', CARD_NOTE],
     table: {
       caption: `추가 카드소비 산출(${t.name}공항 ${nat} 입국자)`,
-      header: ['구분', '기준', '입국자(명)', '체류 증가일(일)', '인·일당 카드소비(원)', '추가 소비(백만원)', '사업비 대비(배)'],
+      header: ['구분', '기준', '입국자(명)', '체류 증가일(일)', '인·일당 카드소비(원)', '추가 소비(백만원)', '추가 소비÷사업비(배)'],
       rows: [row('하한', `${t.name} 현재`, r.perDayTarget), ...(c ? [row('상한', `${c.name} 수준${r.compareIsReference ? '(참고)' : ''}`, r.perDayCompare)] : [])],
     },
   }

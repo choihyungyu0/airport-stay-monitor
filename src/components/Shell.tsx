@@ -3,23 +3,29 @@ import { fmtHalf, fmtYm } from '../lib/format'
 import type { Meta } from '../lib/types'
 import { Segmented } from './Segmented'
 
-export type Tab = 'overview' | 'sgg' | 'effect' | 'report' | 'data'
+export type Tab = 'map' | 'effect' | 'report' | 'data'
 
 export const TABS: { id: Tab; label: string }[] = [
-  { id: 'overview', label: '현황' },
-  { id: 'sgg', label: '시군구' },
+  { id: 'map', label: '지도' },
   { id: 'effect', label: '효과 계산' },
   { id: 'report', label: '보고 문안' },
   { id: 'data', label: '자료·검증' },
 ]
 
-// 명세서 화면흐름의 해시 앵커도 그대로 받는다(#summary #trend #map #method).
-const LEGACY: Record<string, Tab> = { summary: 'overview', trend: 'overview', map: 'sgg', scenario: 'effect', method: 'data' }
+// 예전 주소와 명세서 앵커는 지금 탭으로 돌린다(#overview #sgg #summary #trend → #map 등).
+const LEGACY: Record<string, Tab> = { overview: 'map', sgg: 'map', summary: 'map', trend: 'map', scenario: 'effect', method: 'data' }
 
 export function tabFromHash(hash: string): Tab {
   const h = hash.replace(/^#/, '')
   if (TABS.some((t) => t.id === h)) return h as Tab
-  return LEGACY[h] ?? 'overview'
+  return LEGACY[h] ?? 'map'
+}
+
+/** 예전 주소면 새 해시로 바꿔 둔다(뒤로 가기 기록은 남기지 않음). */
+export function canonicalHash(hash: string): string | null {
+  const h = hash.replace(/^#/, '')
+  if (!h || TABS.some((t) => t.id === h)) return null
+  return LEGACY[h] ? `#${LEGACY[h]}` : null
 }
 
 interface BarProps {
@@ -34,7 +40,7 @@ export function TopBar({ tab, nat, nats, onNat }: BarProps) {
   return (
     <div className="bar">
       <div className="bar-in">
-        <a className="brand" href="#overview">
+        <a className="brand" href="#map">
           <b>CJJ</b>
           <span>공항 체류전환 모니터</span>
         </a>

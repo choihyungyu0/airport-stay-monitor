@@ -236,3 +236,33 @@ def test_outputs_are_committed_and_current(cfg):
         path = ROOT / "public" / "data" / name
         assert path.exists(), name
         assert path.read_text(encoding="utf-8") == text, f"{name}이 최신이 아닙니다 → npm run build:data"
+
+
+# ── 지도 탭 자료 ──────────────────────────────────────────────────────
+
+def test_map_airports_and_supply(built):
+    """공항 점(소수 둘째 자리)과 반경 숙박 공급(지시서 10장 값 그대로)."""
+    ind_json = built["indicators.json"]
+    cj = next(a for a in ind_json["airports"] if a["id"] == "cjj")
+    assert (cj["lat"], cj["lng"], cj["military_shared"]) == (36.72, 127.5, True)
+    assert cj["lodging"] == {"5": {"total": 9, "hotel": 0}, "10": {"total": 258, "hotel": 17}}
+    for a in ind_json["airports"]:
+        assert round(a["lat"], 2) == a["lat"] and round(a["lng"], 2) == a["lng"]
+
+
+def test_map_sido_boundary(built):
+    g = built["boundary_sido.geojson"]
+    assert {f["properties"]["region"] for f in g["features"]} == {"충북", "대구", "부산", "제주"}
+
+
+def test_map_pins_inside_sgg(built):
+    pins = built["sgg.json"]["pins"]["items"]
+    assert [p["name"] for p in pins] == ["육거리시장", "충주중앙탑공원", "만천하스카이워크", "단양 체험콘텐츠", "제천 약채락 맛기행", "음성품바축제"]
+    c9 = next(c for c in built["meta.json"]["report"]["checks"] if c["id"] == "C9")
+    assert c9["status"] == "pass", c9["detail"]
+
+
+def test_kitagawa_rounded_sums(built):
+    """표시값 반올림: 구성 + 국적별 효과 = 가중 1인당 변화(원 단위)."""
+    d = built["indicators.json"]["decomposition"]
+    assert d["comp"] + sum(d["rate"].values()) == d["total"]

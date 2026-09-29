@@ -1,11 +1,49 @@
 {
-  "_doc": "공항-권역 쌍(UI-12). 한 줄을 추가하면 카드·차트에 자동 반영된다. column=입국관광통계 공항 열, region=데이터랩 시도명. V2 검정을 통과하기 전에는 참고값으로만 표시된다(BR-I3).",
+  "_doc": "공항-권역 쌍(UI-12). 한 줄을 추가하면 카드·차트·지도에 자동 반영된다. column=입국관광통계 공항 열, region=데이터랩 시도명. lat·lng는 지도 표시용 점 하나(소수 둘째 자리까지만). military_shared=공군과 활주로를 같이 쓰는 공항 — 확대 제한·보호구역 마스크 대상. V2 검정을 통과하기 전에는 참고값으로만 표시된다(BR-I3).",
   "target": "cjj",
   "reference_airport": "icn",
   "airports": [
-    { "id": "cjj", "name": "청주", "column": "cjj", "region": "충북", "color": "accent", "role": "target" },
-    { "id": "tae", "name": "대구", "column": "tae", "region": "대구", "color": "daegu" },
-    { "id": "pus", "name": "김해", "column": "pus", "region": "부산", "color": "gimhae" },
-    { "id": "cju", "name": "제주", "column": "cju", "region": "제주", "color": "jeju", "role": "baseline" }
+    {
+      "id": "cjj",
+      "name": "청주",
+      "column": "cjj",
+      "region": "충북",
+      "color": "accent",
+      "role": "target",
+      "lat": 36.72,
+      "lng": 127.5,
+      "military_shared": true
+    },
+    {
+      "id": "tae",
+      "name": "대구",
+      "column": "tae",
+      "region": "대구",
+      "color": "daegu",
+      "lat": 35.89,
+      "lng": 128.66,
+      "military_shared": true
+    },
+    {
+      "id": "pus",
+      "name": "김해",
+      "column": "pus",
+      "region": "부산",
+      "color": "gimhae",
+      "lat": 35.18,
+      "lng": 128.94,
+      "military_shared": true
+    },
+    {
+      "id": "cju",
+      "name": "제주",
+      "column": "cju",
+      "region": "제주",
+      "color": "jeju",
+      "role": "baseline",
+      "lat": 33.51,
+      "lng": 126.49,
+      "military_shared": false
+    }
   ]
 }

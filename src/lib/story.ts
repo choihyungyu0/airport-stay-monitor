@@ -65,8 +65,8 @@ export function mapStory(sgg: SggData, nat: string): MapStory | null {
   const ratio = p(visitTop) ? p(spendTop) / p(visitTop) : null
   const title =
     visitTop.cd === spendTop.cd
-      ? `방문도 소비도 ${visitTop.name}${ap}에 몰립니다.`
-      : `방문은 ${visitTop.name}${ap}에 몰리고, 지갑은 ${spendTop.name}에서 열립니다.`
+      ? `방문 최다·방문 1회당 소비 최대 ${visitTop.name}${ap} ${fmt(v(visitTop))}명/월 · ${fmt(p(visitTop))}원`
+      : `방문 최다 ${visitTop.name}${ap} ${fmt(v(visitTop))}명/월 · 방문 1회당 소비 최대 ${spendTop.name} ${fmt(p(spendTop))}원(${visitTop.name}의 ${ratio ? times(ratio) : '–'})`
   return { visitTop, spendTop, ratio, title }
 }
 
@@ -118,6 +118,19 @@ export function decompCaption(d: Extract<Decomposition, { skipped: false }>): st
   return `${d.nats.join('·')} 합산 입국 1인당 카드소비 ${fmt(d.R0)}원 → ${fmt(d.R1)}원(${signed(d.total)}원, ${pct}). 국적 구성 변화와 국적별 1인당 변화로 나눈 값입니다.`
 }
 
-const DAYS: Record<string, string> = { '0': '지금처럼 머물면', '0.5': '반나절 더 머물면', '1': '하루 더 머물면', '1.5': '하루 반 더 머물면', '2': '이틀 더 머물면' }
+/** 효과 계산 제목: "체류 0.5일 증가 시" */
+export const daysPhrase = (d: number): string => `체류 ${d.toFixed(1)}일 증가 시`
 
-export const daysPhrase = (d: number): string => DAYS[String(d)] ?? `${d}일 더 머물면`
+/** 첫 화면 비교 한 줄: "청주 입국 대만인 1인당 충북 카드소비는 김해→부산의 8.4%, 체류는 김해의 47%" */
+export function compareLine(data: Indicators, nat: string): string | null {
+  const t = data.airports.find((a) => a.id === data.target)
+  const h = t?.nat[nat]?.halves?.[data.halves.target]
+  if (!t || !h?.per_arrival_spend || !h.visit_ratio) return null
+  const best = data.airports
+    .filter((a) => a.id !== t.id && a.nat[nat]?.status === '채택')
+    .map((a) => ({ a, h: a.nat[nat]!.halves![data.halves.target] }))
+    .sort((x, y) => (y.h.per_arrival_spend ?? 0) - (x.h.per_arrival_spend ?? 0))[0]
+  if (!best?.h.per_arrival_spend || !best.h.visit_ratio) return null
+  const pct = (v: number) => `${v < 10 ? v.toFixed(1) : Math.round(v)}%`
+  return `${t.name} 입국 ${nat}인 1인당 ${t.region} 카드소비는 ${best.a.name}→${best.a.region}의 ${pct((h.per_arrival_spend / best.h.per_arrival_spend) * 100)}, 체류는 ${best.a.name}의 ${pct((h.visit_ratio / best.h.visit_ratio) * 100)}`
+}
