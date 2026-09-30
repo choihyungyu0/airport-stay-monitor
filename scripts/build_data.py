@@ -543,13 +543,21 @@ def build_validations(m: Model) -> list[dict]:
                            f"오차 {math.ceil(worst * 1000) / 10:.1f}% 이내",
                 "rows": rows})
 
-    # V2 공항 연동 검정
-    passed = [(a["name"], n) for a in m.airports for n in st["nationalities"]
-              if m.available(a, n) and m.v2(a["id"], n)["pass"]]
-    total = sum(1 for a in m.airports for n in st["nationalities"] if m.available(a, n))
+    # V2 공항 연동 검정: 화면 국적(대만·일본) 기준과, 검정만 함께 돌린 국적(중국·베트남)을 포함한 기준을 따로 센다
+    def v2_count(nats):
+        ok = [m.v2(a["id"], n)["pass"] for a in m.airports for n in nats if m.available(a, n)]
+        return len(ok), sum(ok)
+
+    main_nats = st["nationalities"]
+    extra_nats = [n for n in st["v2_nationalities"] if n not in main_nats]
+    total, passed = v2_count(main_nats)
+    total_all, passed_all = v2_count(st["v2_nationalities"])
+    count = f"{'·'.join(main_nats)} {total}개 중 {passed}개 채택"
+    if extra_nats:
+        count += f"({'·'.join(extra_nats)} 포함 {total_all}개 중 {passed_all}개)"
     out.append({"id": "V2", "title": "공항 연동 검정", "status": "pass",
                 "summary": f"월 수준·전월 차분 상관 모두 지역공항이 인천보다 크고 차분 상관 "
-                           f"{st['v2']['min_diff_corr']} 이상일 때만 채택. {total}개 공항·국적 중 {len(passed)}개 채택"})
+                           f"{st['v2']['min_diff_corr']} 이상일 때만 채택. {count}"})
 
     # V3 시도-시군구 보정
     ms = ind.half_months(m.target)

@@ -238,6 +238,11 @@ h1, h2, h3 { margin: 0; }
 .bld-areas button span { font-family: var(--f-num); font-weight: 500; font-size: 12px; color: var(--glass-dim); }
 .bld-supply { margin-top: 4px; }
 .bld-note { margin: 10px 0 0; font-size: 12px; color: var(--glass-dim); line-height: 1.55; }
+.bldp .src { margin: 10px 0 0; font-size: 12px; color: var(--glass-dim); line-height: 1.55; }
+/* 데스크톱: 건물 패널은 오른쪽 아래 확대·축소 버튼과 출처 표기(약 100px) 위에서 끝나고 안에서 스크롤 */
+@media (min-width: 761px) {
+  .stage-panel.right.bld { max-height: calc(100% - 124px); overflow-y: auto; }
+}
 .bld-h { font-size: 13px; font-weight: 700; margin: 14px 0 6px; }
 .bld-h em { font-style: normal; font-weight: 600; color: var(--sign); border: 1px solid var(--sign); border-radius: 4px; padding: 0 5px; font-size: 11.5px; margin-left: 4px; }
 .bld-counts { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 8px; }

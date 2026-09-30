@@ -170,7 +170,7 @@ export function TrendChart({ data, nat, metric }: Props) {
                   d={d}
                   fill="none"
                   strokeWidth={hi ? 3 : 2}
-                  strokeDasharray={s.passed || metric === 'arr' ? undefined : '5 4'}
+                  strokeDasharray={s.available && !s.passed ? '5 4' : undefined}
                   strokeLinejoin="round"
                   strokeLinecap="round"
                   style={{ stroke: color }}

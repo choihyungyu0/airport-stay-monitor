@@ -103,6 +103,8 @@ export function MapStage({ data, sgg, meta, nat, boundary, sido, onToast }: Prop
     setPicked(null)
   }
   const buildings = bld && scene === 'cheongju'
+  // 모바일(지도 위·패널 아래 배치): 전국 보기(줌 7 이하)에서는 도시명 라벨이 공항 라벨과 겹쳐 하이브리드를 빼고, 공항 라벨을 원에서 더 띄운다
+  const narrow = typeof window !== 'undefined' && window.innerWidth <= 760
 
   return (
     <section className={`stage scene-${scene}`} aria-label="지도" id="map">
@@ -123,7 +125,7 @@ export function MapStage({ data, sgg, meta, nat, boundary, sido, onToast }: Prop
         <ZoomLimit max={maxZoomFor(buildings)} />
         <ZoomWatch onZoom={setZoom} />
         {/* 하이브리드 라벨: 전국 보기, 그리고 건물을 볼 만큼 가까이(줌 13+) 갔을 때 길 이름을 찾도록 */}
-        {placed && <Tiles basemap={basemap} labels={scene === 'korea' || (buildings && zoom >= PROTECT_MIN_ZOOM)} faint={buildings} onFail={onTileFail} />}
+        {placed && <Tiles basemap={basemap} labels={(scene === 'korea' && !(narrow && zoom <= 7)) || (buildings && zoom >= PROTECT_MIN_ZOOM)} faint={buildings} onFail={onTileFail} />}
         {data && placed && <View scene={scene} selected={selected} data={data} panel={panel} />}
         {jump && <Jump key={jump.seq} to={jump.to} panel={panel} />}
         {data && <ProtectMask airports={data.airports} />}
@@ -131,7 +133,7 @@ export function MapStage({ data, sgg, meta, nat, boundary, sido, onToast }: Prop
           <>
             {selected && sido && <SidoHighlight sido={sido} region={data.airports.find((a) => a.id === selected)?.region} target={selected === data.target} />}
             <Rings data={data} />
-            <Airports data={data} nat={nat} month={month} onSelect={setSelected} />
+            <Airports data={data} nat={nat} month={month} onSelect={setSelected} gap={narrow ? 8 : 2} />
           </>
         )}
         {data && sgg && scene === 'cheongju' && boundary && boundary !== 'error' && (
@@ -165,7 +167,7 @@ export function MapStage({ data, sgg, meta, nat, boundary, sido, onToast }: Prop
         </button>
       )}
 
-      <div ref={panel} className={`stage-panel ${scene === 'korea' ? 'left' : 'right'}`} aria-busy={!data}>
+      <div ref={panel} className={`stage-panel ${scene === 'korea' ? 'left' : 'right'}${buildings ? ' bld' : ''}`} aria-busy={!data}>
         {!data || !sgg ? (
           <div className="stage-wait" aria-label="불러오는 중">
             <div className="skel" style={{ height: 22, width: '60%' }} />
@@ -340,7 +342,7 @@ function View({ scene, selected, data, panel }: { scene: Scene; selected: string
 }
 
 /** 공항 점 4곳: 원 크기 = ② 체류 인·일, 채움 농도 = ① 1인당 카드소비. 청주만 노랑, 참고값은 점선. */
-function Airports({ data, nat, month, onSelect }: { data: Indicators; nat: string; month: number | null; onSelect: (id: string) => void }) {
+function Airports({ data, nat, month, onSelect, gap }: { data: Indicators; nat: string; month: number | null; onSelect: (id: string) => void; gap: number }) {
   const { target } = data.halves
   const maxPer = Math.max(1, ...data.airports.map((a) => a.nat[nat]?.halves?.[target]?.per_arrival_spend ?? 0))
   return (
@@ -371,7 +373,7 @@ function Airports({ data, nat, month, onSelect }: { data: Indicators; nat: strin
             }}
             eventHandlers={{ click: () => onSelect(a.id) }}
           >
-            <Tooltip permanent direction="right" offset={[r + 2, 0]} className={`ap-tip${isT ? ' t' : ''}`}>
+            <Tooltip key={`tip-${gap}`} permanent direction="right" offset={[r + gap, 0]} className={`ap-tip${isT ? ' t' : ''}`}>
               {iata(a)}
               {ref ? ' · 참고값' : ''}
               {thin ? ' · 표본 적음' : ''}
