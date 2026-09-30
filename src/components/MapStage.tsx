@@ -531,7 +531,8 @@ function Cheongju({ data, sgg, nat, boundary, basemap, active, onHover, onPin, q
               className: 'stage-label',
               iconSize: [0, 0],
               html: text
-                ? `<span class="box${hl ? ' hl' : ''}" style="margin-top:${hl ? -34 : 30}px">${text}</span>`
+                ? // 공항 구 값은 위에, 다른 값 라벨은 구의 서쪽(왼쪽)에 붙여 청주 4구 이름과 겹치지 않게 한다
+                  `<span class="box${hl ? ' hl' : ' w'}"${hl ? ' style="margin-top:-34px"' : ''}>${text}</span>`
                 : `<span class="name">${p.name}</span>`,
             })}
           />

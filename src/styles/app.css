@@ -253,9 +253,11 @@ h1, h2, h3 { margin: 0; }
 .legend .bsw.retail_food { border-color: var(--bld-retail); background: rgba(63, 208, 192, .4); }
 .legend .bsw.other { border-color: var(--bld-other); background: transparent; }
 .stage-label { background: none; border: 0; }
-.stage-label span { display: block; transform: translate(-50%, -50%); white-space: nowrap; pointer-events: none; }
+/* 라벨 칸(divIcon)은 폭 0이라, 글자 폭(max-content)을 줘야 배경이 글자를 덮고 가운데 정렬(-50%)이 맞는다 */
+.stage-label span { display: block; width: max-content; transform: translate(-50%, -50%); white-space: nowrap; pointer-events: none; }
 .stage-label .box { background: rgba(10, 14, 20, .82); color: #fff; padding: 3px 8px; border-radius: 5px; font-size: 12px; font-weight: 600; border: 1px solid var(--glass-line); }
 .stage-label .box.hl { border-color: var(--sign); }
+.stage-label .box.w { transform: translate(calc(-100% - 18px), -50%); }
 .stage-label .name { color: #fff; font-size: 11.5px; font-weight: 600; text-shadow: 0 0 3px #000, 0 0 3px #000, 0 0 2px #000; }
 .stage-pin { background: none; border: 0; }
 .stage-pin span { display: block; width: 12px; height: 12px; margin: 3px; background: var(--sign); border: 2px solid var(--night); transform: rotate(45deg); border-radius: 2px; box-shadow: 0 0 0 1px var(--sign); }
